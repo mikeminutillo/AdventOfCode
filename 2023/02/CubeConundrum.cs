@@ -8,7 +8,7 @@ class CubeConundrum : AdventOfCodeBase
     [TestCase]
     public void Example1()
     {
-        var input = Load("sample1");
+        var input = Load("sample");
 
         var games = input.AsLines().Select(x => new Game(x));
 
@@ -28,7 +28,7 @@ class CubeConundrum : AdventOfCodeBase
 
     [TestCase] public void Example2()
     {
-        var input = Load("sample1");
+        var input = Load("sample");
 
         var games = input.AsLines().Select(x => new Game(x));
 
