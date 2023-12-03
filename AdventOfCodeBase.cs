@@ -29,7 +29,7 @@ public abstract class AdventOfCodeBase
     string GetTestFolder()
     {
         var testNamespace = TestContext.CurrentContext.Test.Namespace;
-        var subFolders = string.Join('\\',
+        var subFolders = string.Join(Path.DirectorySeparatorChar,
             testNamespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')));
 
         return Path.Combine(GetSlnFolder(), subFolders);
