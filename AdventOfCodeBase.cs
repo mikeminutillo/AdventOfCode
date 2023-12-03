@@ -35,7 +35,7 @@ public abstract class AdventOfCodeBase
         return Path.Combine(GetSlnFolder(), subFolders);
     }
 
-    protected void Approve(string value, [CallerMemberName] string callerMemberName = null)
+    protected void Approve(string value, [CallerMemberName] string? callerMemberName = null)
     {
         var testFolder = GetTestFolder();
 
@@ -63,7 +63,7 @@ public abstract class AdventOfCodeBase
         File.Delete(receivedFile);
     }
 
-    protected void Approve(object value, [CallerMemberName] string callerMemberName = null)
+    protected void Approve(object value, [CallerMemberName] string? callerMemberName = null)
     {
         Approve(value?.ToString() ?? "", callerMemberName);
     }
