@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2023._04;
 
