@@ -75,10 +75,10 @@ class ScratchCards : AdventOfCodeBase
                split[2]
             );
 
-    record ScratchCard(int CardNumber, int[] WinningNumbers, int[] Numbers)
+    record ScratchCard(int CardNumber, int[] WinningNumbers, int[] GameNumbers)
     {
         public IEnumerable<int> MatchedNumbers =>
-            Numbers.Where(WinningNumbers.Contains);
+            GameNumbers.Intersect(WinningNumbers);
 
         public int PrizeValue
             => MatchedNumbers.Any()
