@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2023._04;
@@ -59,7 +60,7 @@ class ScratchCards : AdventOfCodeBase
         for(var i = 0; i < cards.Length; i++)
         {
             var card = cards[i];
-            var winningNumbers = card.GetWinningNumbers.Count();
+            var winningNumbers = card.MatchedNumbers.Count();
             $"Card {card.CardNumber}: HAS {winningNumbers} winning numbers".Dump();
             for(var j = i+1; j < Math.Min(cards.Length, i+winningNumbers+1); j++)
             {
@@ -88,15 +89,15 @@ class ScratchCards : AdventOfCodeBase
 
     record ScratchCard(int CardNumber, int[] WinningNumbers, int[] Numbers)
     {
-        public IEnumerable<int> GetWinningNumbers =>
+        public IEnumerable<int> MatchedNumbers =>
             Numbers.Where(WinningNumbers.Contains);
 
         public int Prize()
-        {
-            var winningNums = GetWinningNumbers.ToArray();
-            if(winningNums.Length > 0)
-                return (int)Math.Pow(2, winningNums.Length - 1);
-            return 0;
-        }
+            => MatchedNumbers.Any()
+            ? (int)Math.Pow(2, MatchedNumbers.Count() - 1) 
+            : 0;
+
+        public IEnumerable<int> TotalPrizeCards
+            => Enumerable.Range(CardNumber, MatchedNumbers.Count() + 1);
     }
 }
