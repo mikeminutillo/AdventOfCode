@@ -4,41 +4,37 @@ using System.Runtime.CompilerServices;
 namespace AdventOfCode;
 
 [TestFixture]
-public abstract class AdventOfCodeBase
+public abstract class AdventOfCodeBase<T>
 {
-    protected string Load(string path) => File.ReadAllText(
-          Path.Combine(GetTestFolder(), "Input", $"{path}.txt")
-        );
-
-    protected string GetFile(string path) => Path.Combine(GetTestFolder(), path);
+    static IEnumerable<TestCaseData> AllInputs(string part) =>
+        from path in Directory.EnumerateFiles(GetInputFolder(), "*.txt")
+        select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
 
     public virtual object? Solution1(string input) => default;
 
     public virtual object? Solution2(string input) => default;
 
-    [TestCase]
-    public void Problem1()
+    [TestCaseSource(nameof(AllInputs), ["Part1"])]
+    public void Part1(string path)
     {
-        var input = Load("input");
+        var input = File.ReadAllText(path);
 
         var result = Solution1(input);
 
-        if(result is not null)
-            Approve(result);
+        Approve(result, TestContext.CurrentContext.Test.Name);
     }
 
-    [TestCase]
-    public void Problem2()
+    [TestCaseSource(nameof(AllInputs), ["Part2"])]
+    public void Part2(string path)
     {
-        var input = Load("input");
+        var input = File.ReadAllText(path);
 
         var result = Solution2(input);
 
-        if (result is not null)
-            Approve(result);
+        Approve(result, TestContext.CurrentContext.Test.Name);
     }
 
-    string GetSlnFolder()
+    static string GetSlnFolder()
     {
         var currentDir = TestContext.CurrentContext.TestDirectory;
         while (true)
@@ -50,6 +46,15 @@ public abstract class AdventOfCodeBase
                 return currentDir;
             }
         }
+    }
+
+    static string GetInputFolder()
+    {
+        var testNamespace = typeof(T).Namespace;
+        var subFolders = string.Join(Path.DirectorySeparatorChar,
+            testNamespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')));
+
+        return Path.Combine(GetSlnFolder(), subFolders, "Input");
     }
 
     string GetTestFolder()
@@ -89,8 +94,14 @@ public abstract class AdventOfCodeBase
         File.Delete(receivedFile);
     }
 
-    protected void Approve(object value, [CallerMemberName] string? callerMemberName = null)
+    protected void Approve(object? value, [CallerMemberName] string? callerMemberName = null)
     {
         Approve(value?.ToString() ?? "", callerMemberName);
     }
+}
+
+[AttributeUsage(AttributeTargets.Method)]
+class SampleAttribute(string[] Samples) : Attribute
+{
+
 }

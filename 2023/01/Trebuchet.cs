@@ -1,21 +1,17 @@
-﻿using NUnit.Framework;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2023._01;
 
-public class Trebuchet : AdventOfCodeBase
+public class Trebuchet : AdventOfCodeBase<Trebuchet>
 {
-    [TestCase] public void Example() => Approve(Solution1(Load("sample")));
-
-    [TestCase] public void Example2() => Approve(Solution2(Load("sample2")));
-
     public override object Solution1(string input) => Sum(input);
 
     public override object Solution2(string input) => SumWithWords(input);
 
     int Sum(string input) => (from line in input.Split(Environment.NewLine)
-                              let first = line.First(char.IsDigit)
-                              let last = line.Last(char.IsDigit)
+                              let first = line.FirstOrDefault(char.IsDigit)
+                              let last = line.LastOrDefault(char.IsDigit)
+                              where first != default && last != default
                               select int.Parse($"{first}{last}")).Sum();
 
     int SumWithWords(string input) => (from line in input.Split(Environment.NewLine)

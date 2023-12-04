@@ -1,14 +1,9 @@
-﻿using NUnit.Framework;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2023._02;
 
-class CubeConundrum : AdventOfCodeBase
+class CubeConundrum : AdventOfCodeBase<CubeConundrum>
 {
-    [TestCase] public void Example1() => Approve(Solution1(Load("sample")));
-
-    [TestCase] public void Example2() => Approve(Solution2(Load("sample")));
-
     public override object Solution1(string input)
     {
         var games = input.AsLines().Select(x => new Game(x));

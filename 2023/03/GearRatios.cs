@@ -1,15 +1,10 @@
-﻿using NUnit.Framework;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2023._03;
 
-class GearRatios : AdventOfCodeBase
+class GearRatios : AdventOfCodeBase<GearRatios>
 {
-    [TestCase] public void Example1() => Approve(Solution1(Load("sample1")));
-
-    [TestCase] public void Example2() => Approve(Solution2(Load("sample1")));
-
     public override object Solution1(string input)
     {
         var lines = input.AsLines();

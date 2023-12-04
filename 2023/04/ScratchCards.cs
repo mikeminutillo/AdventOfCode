@@ -1,14 +1,9 @@
-﻿using NUnit.Framework;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace AdventOfCode._2023._04;
 
-class ScratchCards : AdventOfCodeBase
+class ScratchCards : AdventOfCodeBase<ScratchCards>
 {
-    [TestCase] public void Example() => Approve(Solution1(Load("sample")));
-
-    [TestCase] public void Example2() => Approve(Solution2(Load("sample")));
-
     public override object Solution1(string input)
         => GetCards(input)
         .Sum(x => x.PrizeValue);
