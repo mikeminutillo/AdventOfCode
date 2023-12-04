@@ -10,22 +10,11 @@ class ScratchCards : AdventOfCodeBase
     [TestCase] public void Example2() => Approve(Solution2(Load("sample")));
 
     public override object Solution1(string input)
-    {
-        var cards = GetCards(input);
-
-        var result = cards.Sum(x => x.PrizeValue);
-
-        return result;
-    }
+        => GetCards(input)
+        .Sum(x => x.PrizeValue);
 
     public override object Solution2(string input)
-    {
-        var cards = GetCards(input).ToArray();
-
-        var result = AggregateCards(cards);
-
-        return result;
-    }
+        => AggregateCards(GetCards(input).ToArray());
 
     int AggregateCards(IEnumerable<ScratchCard> cards)
         => cards.Aggregate(
