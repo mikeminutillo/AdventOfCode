@@ -14,7 +14,7 @@ class ScratchCards : AdventOfCodeBase
 
         var cards = GetCards(input);
 
-        var result = cards.Sum(x => x.Prize());
+        var result = cards.Sum(x => x.PrizeValue);
 
         Approve(result);
     }
@@ -38,7 +38,7 @@ class ScratchCards : AdventOfCodeBase
 
         var cards = GetCards(input);
 
-        var result = cards.Sum(x => x.Prize());
+        var result = cards.Sum(x => x.PrizeValue);
 
         Approve(result);
     }
@@ -59,7 +59,7 @@ class ScratchCards : AdventOfCodeBase
         => cards.Aggregate(
             cards.ToImmutableDictionary(x => x.CardNumber, x => 1),
             (counts, card) => counts.SetItems(
-                from bonus in card.TotalPrizeCards 
+                from bonus in card.PrizeCards 
                 select KeyValuePair.Create(
                     bonus,
                     counts[bonus] + counts[card.CardNumber])
@@ -83,12 +83,12 @@ class ScratchCards : AdventOfCodeBase
         public IEnumerable<int> MatchedNumbers =>
             Numbers.Where(WinningNumbers.Contains);
 
-        public int Prize()
+        public int PrizeValue
             => MatchedNumbers.Any()
             ? (int)Math.Pow(2, MatchedNumbers.Count() - 1)
             : 0;
 
-        public IEnumerable<int> TotalPrizeCards
+        public IEnumerable<int> PrizeCards
             => Enumerable.Range(CardNumber + 1, MatchedNumbers.Count());
     }
 }
