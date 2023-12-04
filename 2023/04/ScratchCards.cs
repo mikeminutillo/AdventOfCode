@@ -69,23 +69,22 @@ class ScratchCards : AdventOfCodeBase
            let split = (from section in line.Split([.. ":|"])
                         select section.ExtractNumbers().ToArray()
                        ).ToArray()
+           let cardNumber = split[0].Single()
+           let winningNumbers = split[1]
+           let gameNumbers = split[2]
            select new ScratchCard(
-               split[0].Single(),
-               split[1],
-               split[2]
+               cardNumber,
+               gameNumbers.Intersect(winningNumbers).Count()
             );
 
-    record ScratchCard(int CardNumber, int[] WinningNumbers, int[] GameNumbers)
+    record ScratchCard(int CardNumber, int WinningNumbers)
     {
-        public IEnumerable<int> MatchedNumbers =>
-            GameNumbers.Intersect(WinningNumbers);
-
         public int PrizeValue
-            => MatchedNumbers.Any()
-            ? (int)Math.Pow(2, MatchedNumbers.Count() - 1)
+            => WinningNumbers > 0
+            ? (int)Math.Pow(2, WinningNumbers - 1)
             : 0;
 
         public IEnumerable<int> PrizeCards
-            => Enumerable.Range(CardNumber + 1, MatchedNumbers.Count());
+            => Enumerable.Range(CardNumber + 1, WinningNumbers);
     }
 }
