@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
@@ -73,11 +72,6 @@ class ScratchCards : AdventOfCodeBase
                               select int.Parse(match.Value)
                               ).ToArray()
                       ).ToArray()
-
-           //let cardMatch = Regex.Match(line, @"Card\s+(\d+):")
-           //let split = line.Substring(cardMatch.Value.Length).Split('|')
-           //let winningNumbers = Regex.Matches(split[0], @"\d+").Select(m => int.Parse(m.Value)).ToArray()
-           //let numbers = Regex.Matches(split[1], @"\d+").Select(m => int.Parse(m.Value)).ToArray()
            select new ScratchCard(
                split[0].Single(),
                split[1],
