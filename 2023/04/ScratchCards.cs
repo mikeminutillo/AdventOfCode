@@ -60,7 +60,7 @@ class ScratchCards : AdventOfCodeBase
             cards.ToImmutableDictionary(x => x.CardNumber, x => 1),
             (counts, card) => counts.SetItems(
                 from bonus in card.TotalPrizeCards 
-                select new KeyValuePair<int, int>(
+                select KeyValuePair.Create(
                     bonus,
                     counts[bonus] + counts[card.CardNumber])
                 )
