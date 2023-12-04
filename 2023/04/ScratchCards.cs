@@ -68,14 +68,20 @@ class ScratchCards : AdventOfCodeBase
 
     IEnumerable<ScratchCard> GetCards(string input)
         => from line in input.AsLines()
-           let cardMatch = Regex.Match(line, @"Card\s+(\d+):")
-           let split = line.Substring(cardMatch.Value.Length).Split('|')
-           let winningNumbers = Regex.Matches(split[0], @"\d+").Select(m => int.Parse(m.Value)).ToArray()
-           let numbers = Regex.Matches(split[1], @"\d+").Select(m => int.Parse(m.Value)).ToArray()
+           let split = (from section in line.Split([.. ":|"])
+                       select (from match in Regex.Matches(section, @"\d+")
+                              select int.Parse(match.Value)
+                              ).ToArray()
+                      ).ToArray()
+
+           //let cardMatch = Regex.Match(line, @"Card\s+(\d+):")
+           //let split = line.Substring(cardMatch.Value.Length).Split('|')
+           //let winningNumbers = Regex.Matches(split[0], @"\d+").Select(m => int.Parse(m.Value)).ToArray()
+           //let numbers = Regex.Matches(split[1], @"\d+").Select(m => int.Parse(m.Value)).ToArray()
            select new ScratchCard(
-               int.Parse(cardMatch.Result("$1")),
-               winningNumbers,
-               numbers
+               split[0].Single(),
+               split[1],
+               split[2]
             );
 
     record ScratchCard(int CardNumber, int[] WinningNumbers, int[] Numbers)
