@@ -55,10 +55,15 @@ class ScratchCards : AdventOfCodeBase
         Approve(result);
     }
 
-    int AggregateCards(ScratchCard[] cards)
+    int AggregateCards(IEnumerable<ScratchCard> cards)
         => cards.Aggregate(
             cards.ToImmutableDictionary(x => x.CardNumber, x => 1),
-            (counts, card) => counts.SetItems(from bonus in card.TotalPrizeCards select new KeyValuePair<int, int>(bonus, counts[bonus] + counts[card.CardNumber]))
+            (counts, card) => counts.SetItems(
+                from bonus in card.TotalPrizeCards 
+                select new KeyValuePair<int, int>(
+                    bonus,
+                    counts[bonus] + counts[card.CardNumber])
+                )
            ).Values.Sum();
 
     IEnumerable<ScratchCard> GetCards(string input)
