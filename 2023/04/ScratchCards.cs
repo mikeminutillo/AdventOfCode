@@ -57,16 +57,9 @@ class ScratchCards : AdventOfCodeBase
 
     int AggregateCards(ScratchCard[] cards)
         => cards.Aggregate(
-            new ConcurrentDictionary<int, int>(),
-            (counts, card) =>
-            {
-                var count = counts.GetOrAdd(card.CardNumber, 1);
-                foreach (var bonus in card.TotalPrizeCards)
-                {
-                    counts.AddOrUpdate(bonus, count + 1, (_, c) => c + count);
-                }
-                return counts;
-            }).Values.Sum();
+            cards.ToImmutableDictionary(x => x.CardNumber, x => 1),
+            (counts, card) => counts.SetItems(from bonus in card.TotalPrizeCards select new KeyValuePair<int, int>(bonus, counts[bonus] + counts[card.CardNumber]))
+           ).Values.Sum();
 
     IEnumerable<ScratchCard> GetCards(string input)
         => from line in input.AsLines()
