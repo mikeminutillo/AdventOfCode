@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
@@ -55,25 +56,17 @@ class ScratchCards : AdventOfCodeBase
     }
 
     int AggregateCards(ScratchCard[] cards)
-    {
-        var counts = cards.ToDictionary(x => x.CardNumber, y => 1);
-        for(var i = 0; i < cards.Length; i++)
-        {
-            var card = cards[i];
-            var winningNumbers = card.MatchedNumbers.Count();
-            $"Card {card.CardNumber}: HAS {winningNumbers} winning numbers".Dump();
-            for(var j = i+1; j < Math.Min(cards.Length, i+winningNumbers+1); j++)
+        => cards.Aggregate(
+            new ConcurrentDictionary<int, int>(),
+            (counts, card) =>
             {
-                var add = counts[card.CardNumber];
-                $"Card {card.CardNumber}: adding {add} copy of card {j + 1}".Dump();
-                counts[j+1] += add;
-            }
-
-            $"Card {card.CardNumber}: {counts[card.CardNumber]}".Dump();
-        }
-
-        return counts.Values.Sum();
-    }
+                var count = counts.GetOrAdd(card.CardNumber, 1);
+                foreach (var bonus in card.TotalPrizeCards)
+                {
+                    counts.AddOrUpdate(bonus, count + 1, (_, c) => c + count);
+                }
+                return counts;
+            }).Values.Sum();
 
     IEnumerable<ScratchCard> GetCards(string input)
         => from line in input.AsLines()
@@ -94,10 +87,10 @@ class ScratchCards : AdventOfCodeBase
 
         public int Prize()
             => MatchedNumbers.Any()
-            ? (int)Math.Pow(2, MatchedNumbers.Count() - 1) 
+            ? (int)Math.Pow(2, MatchedNumbers.Count() - 1)
             : 0;
 
         public IEnumerable<int> TotalPrizeCards
-            => Enumerable.Range(CardNumber, MatchedNumbers.Count() + 1);
+            => Enumerable.Range(CardNumber + 1, MatchedNumbers.Count());
     }
 }
