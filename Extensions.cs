@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace AdventOfCode;
 
@@ -34,4 +35,7 @@ static class Extensions
 
     public static int Product(this IEnumerable<int> source)
         => source.Aggregate(1, (x, y) => x * y);
+
+    public static IEnumerable<int> ExtractNumbers(this string source)
+        => from match in Regex.Matches(source, @"\d+") select int.Parse(match.Value);
 }

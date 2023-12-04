@@ -68,10 +68,8 @@ class ScratchCards : AdventOfCodeBase
     IEnumerable<ScratchCard> GetCards(string input)
         => from line in input.AsLines()
            let split = (from section in line.Split([.. ":|"])
-                       select (from match in Regex.Matches(section, @"\d+")
-                              select int.Parse(match.Value)
-                              ).ToArray()
-                      ).ToArray()
+                        select section.ExtractNumbers().ToArray()
+                       ).ToArray()
            select new ScratchCard(
                split[0].Single(),
                split[1],
