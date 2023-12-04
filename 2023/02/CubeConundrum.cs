@@ -5,11 +5,12 @@ namespace AdventOfCode._2023._02;
 
 class CubeConundrum : AdventOfCodeBase
 {
-    [TestCase]
-    public void Example1()
-    {
-        var input = Load("sample");
+    [TestCase] public void Example1() => Approve(Solution1(Load("sample")));
 
+    [TestCase] public void Example2() => Approve(Solution2(Load("sample")));
+
+    public override object Solution1(string input)
+    {
         var games = input.AsLines().Select(x => new Game(x));
 
         var totals = new Dictionary<string, int>
@@ -23,54 +24,11 @@ class CubeConundrum : AdventOfCodeBase
 
         var validSum = validGames.Sum(x => x.GameNumber);
 
-        Approve(validSum);
+        return validSum;
     }
 
-    [TestCase] public void Example2()
-    {
-        var input = Load("sample");
-
-        var games = input.AsLines().Select(x => new Game(x));
-
-        var result = games.Sum(x => x.Power);
-
-        Approve(result);
-    }
-
-    [TestCase]
-    public void Problem1()
-    {
-        var input = Load("input");
-
-        var games = input.AsLines().Select(x => new Game(x));
-
-        var totals = new Dictionary<string, int>
-        {
-            ["red"] = 12,
-            ["green"] = 13,
-            ["blue"] = 14
-        };
-
-        var validGames = games.Where(x => x.IsValid(totals));
-
-        var validSum = validGames.Sum(x => x.GameNumber);
-
-        Approve(validSum);
-    }
-
-    [TestCase]
-    public void Problem2()
-    {
-        var input = Load("input");
-
-        var games = input.AsLines().Select(x => new Game(x));
-
-        var result = games.Sum(x => x.Power);
-
-        Approve(result);
-    }
-
-
+    public override object Solution2(string input)
+        => input.AsLines().Select(x => new Game(x)).Sum(x => x.Power);
 
     class Game
     {

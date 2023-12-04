@@ -6,58 +6,31 @@ namespace AdventOfCode._2023._03;
 
 class GearRatios : AdventOfCodeBase
 {
-    [TestCase]
-    public void Example1()
-    {
-        var input = Load("sample1").AsLines();
+    [TestCase] public void Example1() => Approve(Solution1(Load("sample1")));
 
-        var symParts = GetParts(input, @"[^\d.]").ToArray();
-        var numParts = GetParts(input, @"\d+").ToArray();
+    [TestCase] public void Example2() => Approve(Solution2(Load("sample1")));
+
+    public override object Solution1(string input)
+    {
+        var lines = input.AsLines();
+        var symParts = GetParts(lines, @"[^\d.]").ToArray();
+        var numParts = GetParts(lines, @"\d+").ToArray();
 
         var result = GetAdjacentParts(numParts, symParts)
                         .Sum(p => p.Number);
-
-        Approve(result);
+        return result;
     }
 
-    [TestCase]
-    public void Example2()
+    public override object Solution2(string input)
     {
-        var input = Load("sample1").AsLines();
+        var lines = input.AsLines();
 
-        var gearParts = GetParts(input, @"\*").ToArray();
-        var numParts = GetParts(input, @"\d+").ToArray();
+        var gearParts = GetParts(lines, @"\*").ToArray();
+        var numParts = GetParts(lines, @"\d+").ToArray();
 
         var gearRatios = GetGearRatios(gearParts, numParts);
 
-        Approve(gearRatios.Sum());
-    }
-
-    [TestCase]
-    public void Problem1()
-    {
-        var input = Load("input").AsLines();
-
-        var symParts = GetParts(input, @"[^\d.]").ToArray();
-        var numParts = GetParts(input, @"\d+").ToArray();
-
-        var result = GetAdjacentParts(numParts, symParts)
-                        .Sum(p => p.Number);
-
-        Approve(result);
-    }
-
-    [TestCase]
-    public void Problem2()
-    {
-        var input = Load("input").AsLines();
-
-        var gearParts = GetParts(input, @"\*").ToArray();
-        var numParts = GetParts(input, @"\d+").ToArray();
-
-        var gearRatios = GetGearRatios(gearParts, numParts);
-
-        Approve(gearRatios.Sum());
+        return gearRatios.Sum();
     }
 
     IEnumerable <Part> GetParts(string[] input, string regex)

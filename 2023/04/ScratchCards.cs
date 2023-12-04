@@ -5,52 +5,26 @@ namespace AdventOfCode._2023._04;
 
 class ScratchCards : AdventOfCodeBase
 {
-    [TestCase]
-    public void Example()
-    {
-        var input = Load("sample");
+    [TestCase] public void Example() => Approve(Solution1(Load("sample")));
 
+    [TestCase] public void Example2() => Approve(Solution2(Load("sample")));
+
+    public override object Solution1(string input)
+    {
         var cards = GetCards(input);
 
         var result = cards.Sum(x => x.PrizeValue);
 
-        Approve(result);
+        return result;
     }
 
-    [TestCase]
-    public void Example2()
+    public override object Solution2(string input)
     {
-        var input = Load("sample");
-
         var cards = GetCards(input).ToArray();
 
         var result = AggregateCards(cards);
 
-        Approve(result);
-    }
-
-    [TestCase]
-    public void Problem1()
-    {
-        var input = Load("input");
-
-        var cards = GetCards(input);
-
-        var result = cards.Sum(x => x.PrizeValue);
-
-        Approve(result);
-    }
-
-    [TestCase]
-    public void Problem2()
-    {
-        var input = Load("input");
-
-        var cards = GetCards(input).ToArray();
-
-        var result = AggregateCards(cards);
-
-        Approve(result);
+        return result;
     }
 
     int AggregateCards(IEnumerable<ScratchCard> cards)

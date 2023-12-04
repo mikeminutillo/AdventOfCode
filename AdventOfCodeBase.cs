@@ -12,6 +12,32 @@ public abstract class AdventOfCodeBase
 
     protected string GetFile(string path) => Path.Combine(GetTestFolder(), path);
 
+    public virtual object? Solution1(string input) => default;
+
+    public virtual object? Solution2(string input) => default;
+
+    [TestCase]
+    public void Problem1()
+    {
+        var input = Load("input");
+
+        var result = Solution1(input);
+
+        if(result is not null)
+            Approve(result);
+    }
+
+    [TestCase]
+    public void Problem2()
+    {
+        var input = Load("input");
+
+        var result = Solution2(input);
+
+        if (result is not null)
+            Approve(result);
+    }
+
     string GetSlnFolder()
     {
         var currentDir = TestContext.CurrentContext.TestDirectory;

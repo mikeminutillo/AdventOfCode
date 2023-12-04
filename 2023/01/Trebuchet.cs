@@ -5,45 +5,13 @@ namespace AdventOfCode._2023._01;
 
 public class Trebuchet : AdventOfCodeBase
 {
-    [TestCase]
-    public void Example()
-    {
-        var input = Load("sample");
-    
-        var result = Sum(input);
+    [TestCase] public void Example() => Approve(Solution1(Load("sample")));
 
-        Approve(result);
-    }
+    [TestCase] public void Example2() => Approve(Solution2(Load("sample2")));
 
-    [TestCase]
-    public void Example2()
-    {
-        var input = Load("sample2");
+    public override object Solution1(string input) => Sum(input);
 
-        var result = SumWithWords(input);
-
-        Approve(result);
-    }
-
-    [TestCase]
-    public void Problem1()
-    {
-        var input = Load("input");
-
-        var result = Sum(input);
-
-        Approve(result);
-    }
-
-    [TestCase]
-    public void Problem2() 
-    {
-        var input = Load("input");
-
-        var result = SumWithWords(input);
-
-        Approve(result);
-    }
+    public override object Solution2(string input) => SumWithWords(input);
 
     int Sum(string input) => (from line in input.Split(Environment.NewLine)
                               let first = line.First(char.IsDigit)
@@ -51,17 +19,17 @@ public class Trebuchet : AdventOfCodeBase
                               select int.Parse($"{first}{last}")).Sum();
 
     int SumWithWords(string input) => (from line in input.Split(Environment.NewLine)
-                                        let digits = ToDigits(line).ToArray().Dump()
-                                        let first = digits.First()
-                                        let last = digits.Last()
-                                        select (first * 10) + last
+                                       let digits = ToDigits(line).ToArray().Dump()
+                                       let first = digits.First()
+                                       let last = digits.Last()
+                                       select (first * 10) + last
                                         ).Sum();
 
     IEnumerable<int> ToDigits(string line)
     {
-        foreach(var digit in GetDigits(line)) 
+        foreach (var digit in GetDigits(line))
         {
-            if(digit.Length == 1)
+            if (digit.Length == 1)
             {
                 yield return int.Parse(digit);
             }
@@ -88,7 +56,7 @@ public class Trebuchet : AdventOfCodeBase
     {
         var regex = new Regex("(one|two|three|four|five|six|seven|eight|nine|[0-9])");
         var match = regex.Match(input);
-        while(match.Success)
+        while (match.Success)
         {
             yield return match.Value;
             match = regex.Match(input, match.Index + 1);
