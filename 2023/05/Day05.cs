@@ -134,5 +134,8 @@ public class Day05 : AdventOfCodeBase<Day05>
             if (End > other.End && Start < other.End)
                 yield return new Range(other.End + 1, End);
         }
+
+        public override string ToString()
+            => $"[{Start}..{End}]";
     }
 }
