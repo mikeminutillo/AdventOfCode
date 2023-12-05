@@ -41,9 +41,4 @@ static class Extensions
 
     public static IEnumerable<long> ExtractLongNumbers(this string source)
         => from match in Regex.Matches(source, @"\d+") select long.Parse(match.Value);
-
-    public static IEnumerable<ArraySegment<T>> InSetsOf<T>(this T[] source, int setSize)
-        => from index in Enumerable.Range(0, (source.Length - 1) / setSize + 1)
-           let remaining = Math.Min(source.Length - index, setSize)
-           select new ArraySegment<T>(source, index * setSize, setSize);
 }

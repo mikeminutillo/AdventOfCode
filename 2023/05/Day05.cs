@@ -25,7 +25,7 @@ public class Day05 : AdventOfCodeBase<Day05>
                 ? sections[0]
                     .ExtractLongNumbers()
                     .ToArray()
-                    .InSetsOf(2)
+                    .Chunk(2)
                     .Select(x => new Range(x[0], x[0] + x[1] - 1))
                     .ToArray()
                 : sections[0].ExtractLongNumbers()
