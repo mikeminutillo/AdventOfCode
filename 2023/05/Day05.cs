@@ -5,77 +5,134 @@ namespace AdventOfCode._2023._05;
 
 public class Day05 : AdventOfCodeBase<Day05>
 {
-    [TestCase(98, ExpectedResult = 50)]
-    [TestCase(99, ExpectedResult = 51)]
-    [TestCase(100, ExpectedResult = null)]
-    public long? Test1(long index)
-    {
-        var range = new MapRange(50, 98, 2);
-        return range.Get(index);
-    }
-
     public override object? Solution1(string input)
-        => Almanac.Parse(input).GetLocations().Min();
+        => Almanac.Parse(input).LowestLocationNumber;
 
-    record Almanac(long[] Seeds, Map[] Maps)
+    public override object? Solution2(string input)
+        => Almanac.Parse(input, treatSeedsLineAsRanges: true).LowestLocationNumber;
+
+    record Almanac(Range[] Seeds, AlmanacMap[] Maps)
     {
-        public IEnumerable<long> GetLocations()
-            => Seeds.Select(GetLocation);
+        public long LowestLocationNumber =>
+            Maps.Aggregate(Seeds, (inputs, map) =>
+                map.ApplyTo(inputs).ToArray()
+            ).Min(x => x.Start);
 
-        public long GetLocation(long seed)
-            => Get("humidity", "location",
-            Get("temperature", "humidity",
-            Get("light", "temperature",
-            Get("water", "light", 
-            Get("fertilizer", "water",
-            Get("soil", "fertilizer",
-            Get("seed", "soil", seed)))))));
-
-        public long Get(string from, string to, long index)
-            => Maps.Single(x => x.From == from && x.To == to)
-                .Get(index);
-
-        public static Almanac Parse(string input)
+        public static Almanac Parse(string input, bool treatSeedsLineAsRanges = false)
         {
             var sections = input.Split($"{Environment.NewLine}{Environment.NewLine}");
-            var seeds = sections[0].ExtractLongNumbers().ToArray();
-            var maps = sections.Skip(1).Select(Map.Parse).ToArray();
+            var seeds = treatSeedsLineAsRanges 
+                ? sections[0]
+                    .ExtractLongNumbers()
+                    .ToArray()
+                    .InSetsOf(2)
+                    .Select(x => new Range(x[0], x[0] + x[1] - 1))
+                    .ToArray()
+                : sections[0].ExtractLongNumbers()
+                    .Select(x => new Range(x, x))
+                    .ToArray();
+            var maps = sections.Skip(1).Select(AlmanacMap.Parse).ToArray();
             return new Almanac(seeds, maps);
         }
     }
 
-
-    record Map(string From, string To, MapRange[] Maps)
+    record AlmanacMap(string From, string To, AlmanacMapping[] Mappings)
     {
-        public long Get(long index)
-            => Maps.Aggregate<MapRange, long?>(null, (x, y) => y.Get(index) ?? x)
-            ?? index;
+        public IEnumerable<Range> ApplyTo(Range[] inputs)
+        {
+            var queue = new Queue<Range>(inputs);
 
-        public static Map Parse(string input)
+            while(queue.TryDequeue(out var input))
+            {
+                var handled = false;
+                foreach(var mapping in Mappings)
+                {
+                    var intersection = mapping.Source.Intersection(input);
+                    if(intersection != null)
+                    {
+                        var shiftStart = mapping.Destination.Start + intersection.Start - mapping.Source.Start;
+                        handled = true;
+                        var shifted = intersection.MovedTo(shiftStart);
+                        yield return shifted;
+
+                        $"{From}->{To}: Shifted {intersection} to {shifted}".Dump();
+
+                        foreach (var remainder in input.Disjunction(intersection))
+                        {
+                            $"{From}->{To}: REMAINDER {remainder} added for processing".Dump();
+                            queue.Enqueue(remainder);
+                        }
+                        break;
+                    }
+                }
+                if(!handled)
+                {
+                    // Was not managed by mappings so "falls through"
+                    $"{From}->{To}: {input} not handled. Falling through".Dump();
+                    yield return input;
+                }
+            }
+        }
+
+        public static AlmanacMap Parse(string input)
         {
             var lines = input.Trim().AsLines();
             var titleMatch = Regex.Match(lines[0], @"([^-]+)-to-([^-]+) map:");
             var from = titleMatch.Result("$1");
             var to = titleMatch.Result("$2");
-            return new Map(
+            return new AlmanacMap(
                 from,
                 to,
-                lines.Skip(1).Select(MapRange.Parse).ToArray()
+                lines.Skip(1).Select(AlmanacMapping.Parse).ToArray()
             );
         }
     }
 
-    record MapRange(long DestinationStart, long SourceStart, long Range)
+    record AlmanacMapping(Range Source, Range Destination)
     {
-        public long? Get(long index)
-            => index >= SourceStart && index < SourceStart + Range
-            ? DestinationStart + (index - SourceStart)
+        public long? Map(int x)
+            => Source.Contains(x)
+            ? Destination.Start + x - Source.Start
             : null;
 
-        public static MapRange Parse(string input)
+        public static AlmanacMapping Parse(string input)
         {
             var nums = input.ExtractLongNumbers().ToArray();
-            return new MapRange(nums[0], nums[1], nums[2]);
+            var destinationStart = nums[0];
+            var sourceStart = nums[1];
+            var length = nums[2];
+
+            return new AlmanacMapping(
+                new Range(sourceStart, sourceStart + length + 1),
+                new Range(destinationStart, destinationStart + length + 1)
+            );
+        }
+    }
+
+    record Range(long Start, long End)
+    {
+        public long Length => End - Start + 1;
+
+        public Range MovedTo(long newStart)
+            => new Range(newStart, newStart + Length - 1);
+
+        public bool Contains(long x)
+            => x >= Start && x < End;
+
+        public Range? Intersection(Range other)
+            => other.Start > End || Start > other.End
+            ? null
+            : new Range(
+                Math.Max(Start, other.Start),
+                Math.Min(End, other.End)
+            );
+
+        public IEnumerable<Range> Disjunction(Range other)
+        {
+            if (Start < other.Start && End >= other.Start)
+                yield return new Range(Start, other.Start - 1);
+            if (End > other.End && Start < other.End)
+                yield return new Range(other.End + 1, End);
         }
     }
 }
