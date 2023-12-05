@@ -67,7 +67,6 @@ public class Day05 : AdventOfCodeBase<Day05>
                 }
                 if(!handled)
                 {
-                    // Was not managed by mappings so "falls through"
                     $"{From}->{To}: {input} not handled. Falling through".Dump();
                     yield return input;
                 }
@@ -90,11 +89,6 @@ public class Day05 : AdventOfCodeBase<Day05>
 
     record AlmanacMapping(Range Source, Range Destination)
     {
-        public long? Map(int x)
-            => Source.Contains(x)
-            ? Destination.Start + x - Source.Start
-            : null;
-
         public static AlmanacMapping Parse(string input)
         {
             var nums = input.ExtractLongNumbers().ToArray();
@@ -115,9 +109,6 @@ public class Day05 : AdventOfCodeBase<Day05>
 
         public Range MovedTo(long newStart)
             => new Range(newStart, newStart + Length - 1);
-
-        public bool Contains(long x)
-            => x >= Start && x < End;
 
         public Range? Intersection(Range other)
             => other.Start > End || Start > other.End
