@@ -14,8 +14,9 @@ public class Day05 : AdventOfCodeBase<Day05>
     record Almanac(Range[] Seeds, AlmanacMap[] Maps)
     {
         public long LowestLocationNumber =>
-            Maps.Aggregate(Seeds, (inputs, map) =>
-                map.ApplyTo(inputs).ToArray()
+            Maps.Aggregate(
+                Seeds.AsEnumerable(),
+                (inputs, map) => map.ApplyTo(inputs)
             ).Min(x => x.Start);
 
         public static Almanac Parse(string input, bool treatSeedsLineAsRanges = false)
@@ -24,7 +25,6 @@ public class Day05 : AdventOfCodeBase<Day05>
             var seeds = treatSeedsLineAsRanges 
                 ? sections[0]
                     .ExtractLongNumbers()
-                    .ToArray()
                     .Chunk(2)
                     .Select(x => new Range(x[0], x[0] + x[1] - 1))
                     .ToArray()
@@ -38,7 +38,7 @@ public class Day05 : AdventOfCodeBase<Day05>
 
     record AlmanacMap(string From, string To, AlmanacMapping[] Mappings)
     {
-        public IEnumerable<Range> ApplyTo(Range[] inputs)
+        public IEnumerable<Range> ApplyTo(IEnumerable<Range> inputs)
         {
             var queue = new Queue<Range>(inputs);
 
