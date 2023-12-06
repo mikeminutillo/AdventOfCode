@@ -10,7 +10,9 @@ public abstract class AdventOfCodeBase<T>
         LocalInputs(part).Concat(PrivateInputs(part));
 
     static IEnumerable<TestCaseData> LocalInputs(string part) =>
-        from path in Directory.EnumerateFiles(GetInputFolder(), "*.txt")
+        from path in Directory.EnumerateFiles(
+            Path.Combine(Extensions.GetTestFolder<T>(), "Input"), 
+            "*.txt")
         select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
 
     static IEnumerable<TestCaseData> PrivateInputs(string part)
@@ -18,7 +20,7 @@ public abstract class AdventOfCodeBase<T>
         var rootPath = Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH");
         if (rootPath is not null)
         {
-            var inputPath = Path.Combine(rootPath, GetTestSubfolder());
+            var inputPath = Extensions.GetTestFolder<T>(rootPath);
             if (Directory.Exists(inputPath))
             {
                 foreach(var path in  Directory.EnumerateFiles(inputPath, "*.txt"))
@@ -27,9 +29,7 @@ public abstract class AdventOfCodeBase<T>
                 }
             }
         }
-
     }
-
 
     public virtual object? Solution1(string input) => default;
 
@@ -55,50 +55,17 @@ public abstract class AdventOfCodeBase<T>
         Approve(result, TestContext.CurrentContext.Test.Name);
     }
 
-    static string GetSlnFolder()
-    {
-        var currentDir = TestContext.CurrentContext.TestDirectory;
-        while (true)
-        {
-            currentDir = Path.GetDirectoryName(currentDir)
-                    ?? throw new Exception("No solution file found");
-            if (Directory.EnumerateFiles(currentDir, "*.sln").Any())
-            {
-                return currentDir;
-            }
-        }
-    }
-
-    static string GetTestSubfolder()
-        => string.Join(
-            Path.DirectorySeparatorChar,
-            typeof(T).Namespace!
-                .Split('.')
-            .Skip(1)
-            .Select(x => x.TrimStart('_'))
-        );
-
-    static string GetInputFolder()
-        => Path.Combine(GetSlnFolder(), GetTestSubfolder(), "Input");
-
-    string GetTestFolder()
-    {
-        var testNamespace = TestContext.CurrentContext.Test.Namespace;
-        var subFolders = string.Join(Path.DirectorySeparatorChar,
-            testNamespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')));
-
-        return Path.Combine(GetSlnFolder(), subFolders);
-    }
-
     protected void Approve(string value, [CallerMemberName] string? callerMemberName = null)
     {
-        var testFolder = GetTestFolder();
+        var outputFolder = Path.Combine(Extensions.GetTestFolder<T>(), "Output");
 
-        var receivedFile = Path.Combine(testFolder, "Output", $"{callerMemberName}.received.txt");
+        Extensions.EnsureFolder(outputFolder);
+
+        var receivedFile = Path.Combine(outputFolder, $"{callerMemberName}.received.txt");
 
         File.WriteAllText(receivedFile, value);
 
-        var approvedFile = Path.Combine(testFolder, "Output", $"{callerMemberName}.approved.txt");
+        var approvedFile = Path.Combine(outputFolder,$"{callerMemberName}.approved.txt");
 
         if (!File.Exists(approvedFile))
         {
