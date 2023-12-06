@@ -7,8 +7,29 @@ namespace AdventOfCode;
 public abstract class AdventOfCodeBase<T>
 {
     static IEnumerable<TestCaseData> AllInputs(string part) =>
+        LocalInputs(part).Concat(PrivateInputs(part));
+
+    static IEnumerable<TestCaseData> LocalInputs(string part) =>
         from path in Directory.EnumerateFiles(GetInputFolder(), "*.txt")
         select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
+
+    static IEnumerable<TestCaseData> PrivateInputs(string part)
+    {
+        var rootPath = Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH");
+        if (rootPath is not null)
+        {
+            var inputPath = Path.Combine(rootPath, GetTestSubfolder());
+            if (Directory.Exists(inputPath))
+            {
+                foreach(var path in  Directory.EnumerateFiles(inputPath, "*.txt"))
+                {
+                    yield return new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
+                }
+            }
+        }
+
+    }
+
 
     public virtual object? Solution1(string input) => default;
 
@@ -17,7 +38,7 @@ public abstract class AdventOfCodeBase<T>
     [TestCaseSource(nameof(AllInputs), ["Part1"])]
     public void Part1(string path)
     {
-        var input = File.ReadAllText(path);
+        var input = File.ReadAllText(path).Replace("\r\n", "\n");
 
         var result = Solution1(input);
 
@@ -27,7 +48,7 @@ public abstract class AdventOfCodeBase<T>
     [TestCaseSource(nameof(AllInputs), ["Part2"])]
     public void Part2(string path)
     {
-        var input = File.ReadAllText(path);
+        var input = File.ReadAllText(path).Replace("\r\n", "\n");
 
         var result = Solution2(input);
 
@@ -48,14 +69,17 @@ public abstract class AdventOfCodeBase<T>
         }
     }
 
-    static string GetInputFolder()
-    {
-        var testNamespace = typeof(T).Namespace;
-        var subFolders = string.Join(Path.DirectorySeparatorChar,
-            testNamespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')));
+    static string GetTestSubfolder()
+        => string.Join(
+            Path.DirectorySeparatorChar,
+            typeof(T).Namespace!
+                .Split('.')
+            .Skip(1)
+            .Select(x => x.TrimStart('_'))
+        );
 
-        return Path.Combine(GetSlnFolder(), subFolders, "Input");
-    }
+    static string GetInputFolder()
+        => Path.Combine(GetSlnFolder(), GetTestSubfolder(), "Input");
 
     string GetTestFolder()
     {

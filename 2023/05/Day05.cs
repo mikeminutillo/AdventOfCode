@@ -21,7 +21,7 @@ public class Day05 : AdventOfCodeBase<Day05>
 
         public static Almanac Parse(string input, bool treatSeedsLineAsRanges = false)
         {
-            var sections = input.Split($"{Environment.NewLine}{Environment.NewLine}");
+            var sections = input.Split($"\n\n");
             var seeds = treatSeedsLineAsRanges 
                 ? sections[0]
                     .ExtractLongNumbers()

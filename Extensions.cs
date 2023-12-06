@@ -28,7 +28,7 @@ static class Extensions
     }
 
     public static string[] AsLines(this string input)
-        => input.Split(Environment.NewLine);
+        => input.Trim().Split("\n");
 
     public static int Product<T>(this IEnumerable<T> source, Func<T, int> selector)
         => source.Aggregate(1, (x, y) =>  x * selector(y));

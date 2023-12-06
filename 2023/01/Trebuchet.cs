@@ -8,13 +8,13 @@ public class Trebuchet : AdventOfCodeBase<Trebuchet>
 
     public override object Solution2(string input) => SumWithWords(input);
 
-    int Sum(string input) => (from line in input.Split(Environment.NewLine)
+    int Sum(string input) => (from line in input.AsLines()
                               let first = line.FirstOrDefault(char.IsDigit)
                               let last = line.LastOrDefault(char.IsDigit)
                               where first != default && last != default
                               select int.Parse($"{first}{last}")).Sum();
 
-    int SumWithWords(string input) => (from line in input.Split(Environment.NewLine)
+    int SumWithWords(string input) => (from line in input.AsLines()
                                        let digits = ToDigits(line).ToArray().Dump()
                                        let first = digits.First()
                                        let last = digits.Last()
