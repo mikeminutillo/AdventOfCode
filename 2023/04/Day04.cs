@@ -2,7 +2,7 @@
 
 namespace AdventOfCode._2023._04;
 
-class ScratchCards : AdventOfCodeBase<ScratchCards>
+class Day04 : AdventOfCodeBase<Day04>
 {
     public override object Solution1(string input)
         => GetCards(input)

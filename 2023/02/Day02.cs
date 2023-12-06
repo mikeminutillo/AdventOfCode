@@ -2,7 +2,7 @@
 
 namespace AdventOfCode._2023._02;
 
-class CubeConundrum : AdventOfCodeBase<CubeConundrum>
+class Day02 : AdventOfCodeBase<Day02>
 {
     public override object Solution1(string input)
     {

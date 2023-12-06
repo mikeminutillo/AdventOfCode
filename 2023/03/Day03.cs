@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2023._03;
 
-class GearRatios : AdventOfCodeBase<GearRatios>
+class Day03 : AdventOfCodeBase<Day03>
 {
     public override object Solution1(string input)
     {

@@ -2,7 +2,7 @@
 
 namespace AdventOfCode._2023._01;
 
-public class Trebuchet : AdventOfCodeBase<Trebuchet>
+public class Day01 : AdventOfCodeBase<Day01>
 {
     public override object Solution1(string input) => Sum(input);
 
@@ -22,31 +22,20 @@ public class Trebuchet : AdventOfCodeBase<Trebuchet>
                                         ).Sum();
 
     IEnumerable<int> ToDigits(string line)
-    {
-        foreach (var digit in GetDigits(line))
-        {
-            if (digit.Length == 1)
-            {
-                yield return int.Parse(digit);
-            }
-            else
-            {
-                yield return digit switch
-                {
-                    "one" => 1,
-                    "two" => 2,
-                    "three" => 3,
-                    "four" => 4,
-                    "five" => 5,
-                    "six" => 6,
-                    "seven" => 7,
-                    "eight" => 8,
-                    "nine" => 9,
-                    _ => throw new Exception("Not a digit")
-                };
-            }
-        }
-    }
+        => from digit in GetDigits(line)
+           select digit switch
+           {
+               "one" => 1,
+               "two" => 2,
+               "three" => 3,
+               "four" => 4,
+               "five" => 5,
+               "six" => 6,
+               "seven" => 7,
+               "eight" => 8,
+               "nine" => 9,
+               var d => int.Parse(d)
+           };
 
     IEnumerable<string> GetDigits(string input)
     {
