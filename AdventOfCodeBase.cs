@@ -124,8 +124,3 @@ public abstract class AdventOfCodeBase<T>
     }
 }
 
-[AttributeUsage(AttributeTargets.Method)]
-class SampleAttribute(string[] Samples) : Attribute
-{
-
-}
