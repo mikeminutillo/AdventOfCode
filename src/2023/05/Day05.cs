@@ -1,7 +1,4 @@
-﻿using NUnit.Framework;
-using System.Text.RegularExpressions;
-
-namespace AdventOfCode._2023._05;
+﻿namespace AdventOfCode._2023._05;
 
 public class Day05 : AdventOfCodeBase<Day05>
 {

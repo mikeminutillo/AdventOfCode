@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System.Net;
+﻿using System.Net;
 
 namespace AdventOfCode;
 

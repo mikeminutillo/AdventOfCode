@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace AdventOfCode;
 
@@ -55,39 +54,8 @@ public abstract class AdventOfCodeBase<T>
         Approve(result, TestContext.CurrentContext.Test.Name);
     }
 
-    protected void Approve(string value, [CallerMemberName] string? callerMemberName = null)
-    {
-        var outputFolder = Path.Combine(Extensions.GetTestFolder<T>(), "Output");
-
-        Extensions.EnsureFolder(outputFolder);
-
-        var receivedFile = Path.Combine(outputFolder, $"{callerMemberName}.received.txt");
-
-        File.WriteAllText(receivedFile, value);
-
-        var approvedFile = Path.Combine(outputFolder,$"{callerMemberName}.approved.txt");
-
-        if (!File.Exists(approvedFile))
-        {
-            File.WriteAllText(approvedFile, string.Empty);
-        }
-
-        var approvedText = File.ReadAllText(approvedFile);
-
-        var normalizedApprovedText = approvedText.Replace("\r\n", "\n");
-        var normalizedReceivedText = value.Replace("\r\n", "\n");
-
-        if (!string.Equals(normalizedApprovedText, normalizedReceivedText))
-        {
-            throw new Exception("Approval verification failed.");
-        }
-
-        File.Delete(receivedFile);
-    }
-
     protected void Approve(object? value, [CallerMemberName] string? callerMemberName = null)
     {
-        Approve(value?.ToString() ?? "", callerMemberName);
+        Approvals.Approve(value?.ToString() ?? "", Path.Combine(Extensions.GetTestFolder<T>(), "Output"), callerMemberName);
     }
 }
-
