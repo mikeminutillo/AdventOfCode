@@ -33,4 +33,7 @@ static class Extensions
 
     public static IEnumerable<long> ExtractLongNumbers(this string source)
         => source.GetDigitSets().Select(long.Parse);
+
+    public static IEnumerable<(int rank, T item)> Ranked<T>(this IEnumerable<T> source)
+        => source.Select((item, index) => (index + 1, item));
 }

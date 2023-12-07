@@ -1,30 +1,31 @@
 namespace AdventOfCode._2023._07;
 
+using static Day07.Strength;
+
 public class Day07 : AdventOfCodeBase<Day07>
 {
     public override object? Solution1(string input)
-        => Ranked(input.AsLines().Select(CamelHand.Parse))
-            .Sum(x => x.hand.Bid * x.rank);
+        => input.AsLines()
+                .Select(CamelHand.Parse)
+                .OrderBy(h => h.Strength)
+                .ThenBy(h => h.CardStrength("23456789TJQKA"))
+                .Ranked()
+                .Sum(x => x.item.Bid * x.rank);
 
     public override object? Solution2(string input)
-        => RankedJokersWild(input.AsLines().Select(CamelHand.Parse))
-            .Sum(x => x.hand.Bid * x.rank);
-
-
-    static IEnumerable<(CamelHand hand, int rank)> Ranked(IEnumerable<CamelHand> hands)
-            => hands.OrderBy(h => h.Strength)
-                    .ThenBy(h => h.CardStrength("23456789TJQKA"))
-                    .Select((hand, index) => (hand, index + 1));
-
-    static IEnumerable<(CamelHand hand, int rank)> RankedJokersWild(IEnumerable<CamelHand> hands)
-            => hands.OrderBy(x => x.JokersWildStrength("123456789TQKA"))
-                    .ThenBy(h => h.CardStrength("J23456789TQKA"))
-                    .Select((hand, Index) => (hand, Index + 1));
+        => input.AsLines()
+                .Select(CamelHand.Parse)
+                .OrderBy(x => x.JokersWildStrength)
+                .ThenBy(h => h.CardStrength("J23456789TQKA"))
+                .Ranked()
+                .Sum(x => x.item.Bid * x.rank);
 
     record CamelHand(string Hand, int Bid)
     {
-        public Strength JokersWildStrength(string substitutions)
-            => (from sub in substitutions
+        public Strength JokersWildStrength
+            => Hand == "JJJJJ" 
+             ? Strength 
+             : (from sub in Hand.Except(['J'])
                 let newHand = Hand.Replace('J', sub)
                 select new CamelHand(newHand, Bid).Strength).Max();
 
@@ -35,13 +36,13 @@ public class Day07 : AdventOfCodeBase<Day07>
                 orderby count descending
                 select count).ToArray() switch
                 {
-                    [5] => Strength.FiveOfAKind,
-                    [4, 1] => Strength.FourOfAKind,
-                    [3, 2] => Strength.FullHouse,
-                    [3, ..] => Strength.ThreeOfAKind,
-                    [2, 2, 1] => Strength.TwoPair,
-                    [2, ..] => Strength.OnePair,
-                    [1, ..] => Strength.HighCard,
+                    [5] => FiveOfAKind,
+                    [4, 1] => FourOfAKind,
+                    [3, 2] => FullHouse,
+                    [3, ..] => ThreeOfAKind,
+                    [2, 2, 1] => TwoPair,
+                    [2, ..] => OnePair,
+                    [1, ..] => HighCard,
                     _ => throw new Exception("Not a valid hand")
                 };
 
@@ -53,7 +54,7 @@ public class Day07 : AdventOfCodeBase<Day07>
             => new(input[..5], int.Parse(input[6..]));
     }
 
-    enum Strength
+    public enum Strength
     {
         HighCard,
         OnePair,
