@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="NUnit.Framework"/>
-    <Using Include="System.Text.RegularExpressions"/>
+    <Using Include="NUnit.Framework" />
+    <Using Include="System.Text.RegularExpressions" />
   </ItemGroup>
 
 </Project>

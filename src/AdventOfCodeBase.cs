@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using AdventOfCode.Infrastructure;
 
 namespace AdventOfCode;
 
@@ -10,7 +11,7 @@ public abstract class AdventOfCodeBase<T>
 
     static IEnumerable<TestCaseData> LocalInputs(string part) =>
         from path in Directory.EnumerateFiles(
-            Path.Combine(Extensions.GetTestFolder<T>(), "Input"), 
+            Path.Combine(Utility.GetTestFolder<T>(), "Input"), 
             "*.txt")
         select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
 
@@ -19,7 +20,7 @@ public abstract class AdventOfCodeBase<T>
         var rootPath = Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH");
         if (rootPath is not null)
         {
-            var inputPath = Extensions.GetTestFolder<T>(rootPath);
+            var inputPath = Utility.GetTestFolder<T>(rootPath);
             if (Directory.Exists(inputPath))
             {
                 foreach(var path in  Directory.EnumerateFiles(inputPath, "*.txt"))
@@ -56,6 +57,6 @@ public abstract class AdventOfCodeBase<T>
 
     protected void Approve(object? value, [CallerMemberName] string? callerMemberName = null)
     {
-        Approvals.Approve(value?.ToString() ?? "", Path.Combine(Extensions.GetTestFolder<T>(), "Output"), callerMemberName);
+        Approvals.Approve(value?.ToString() ?? "", Path.Combine(Utility.GetTestFolder<T>(), "Output"), callerMemberName);
     }
 }

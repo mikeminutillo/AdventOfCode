@@ -1,10 +1,10 @@
-﻿namespace AdventOfCode;
+﻿namespace AdventOfCode.Infrastructure;
 
 static class Approvals
 {
     public static void Approve(string value, string outputFolder, string? scenarioName)
     {
-        Extensions.EnsureFolder(outputFolder);
+        Utility.EnsureFolder(outputFolder);
 
         var receivedFile = Path.Combine(outputFolder, $"{scenarioName}.received.txt");
 

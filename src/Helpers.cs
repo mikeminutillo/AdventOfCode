@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using AdventOfCode.Infrastructure;
 
 namespace AdventOfCode;
 
@@ -36,8 +37,8 @@ public class Helpers
             return;
         }
 
-        var outputDir = Extensions.GetTestFolder(year, day, inputDir);;
-        Extensions.EnsureFolder(outputDir);
+        var outputDir = Utility.GetTestFolder(year, day, inputDir);;
+        Utility.EnsureFolder(outputDir);
 
         using var handler = new HttpClientHandler { CookieContainer = cookieContainer };
         using var client = new HttpClient(handler) { BaseAddress = baseAddress };
@@ -50,8 +51,8 @@ public class Helpers
 
     private async Task SetupDay(int year, int day)
     {
-        var testFolder = Extensions.GetTestFolder(year, day);
-        Extensions.EnsureFolder(testFolder);
+        var testFolder = Utility.GetTestFolder(year, day);
+        Utility.EnsureFolder(testFolder);
 
         var solverClassName = $"Day{day:00}";
         var solverFilePath = Path.Combine(testFolder, $"{solverClassName}.cs");
@@ -66,7 +67,7 @@ public class {solverClassName} : AdventOfCodeBase<{solverClassName}>
         }
 
         var inputFolder = Path.Combine(testFolder, "Input");
-        Extensions.EnsureFolder(inputFolder);
+        Utility.EnsureFolder(inputFolder);
 
         var inputFilePath = Path.Combine(inputFolder, "sample.txt");
 
