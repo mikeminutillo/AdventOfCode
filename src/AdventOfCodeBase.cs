@@ -6,30 +6,8 @@ namespace AdventOfCode;
 [TestFixture]
 public abstract class AdventOfCodeBase<T>
 {
-    static IEnumerable<TestCaseData> AllInputs(string part) =>
-        LocalInputs(part).Concat(PrivateInputs(part));
-
-    static IEnumerable<TestCaseData> LocalInputs(string part) =>
-        from path in Directory.EnumerateFiles(
-            Path.Combine(Utility.GetTestFolder<T>(), "Input"), 
-            "*.txt")
-        select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
-
-    static IEnumerable<TestCaseData> PrivateInputs(string part)
-    {
-        var rootPath = Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH");
-        if (rootPath is not null)
-        {
-            var inputPath = Utility.GetTestFolder<T>(rootPath);
-            if (Directory.Exists(inputPath))
-            {
-                foreach(var path in  Directory.EnumerateFiles(inputPath, "*.txt"))
-                {
-                    yield return new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
-                }
-            }
-        }
-    }
+    static IEnumerable<TestCaseData> AllInputs(string part)
+        => Utility.AllInputs<T>(part);
 
     public virtual object? Solution1(string input) => default;
 

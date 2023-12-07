@@ -2,6 +2,31 @@
 
 static class Utility
 {
+    public static IEnumerable<TestCaseData> AllInputs<T>(string part) =>
+        LocalInputs<T>(part).Concat(PrivateInputs<T>(part));
+
+    static IEnumerable<TestCaseData> LocalInputs<T>(string part) =>
+        from path in Directory.EnumerateFiles(
+            Path.Combine(GetTestFolder<T>(), "Input"),
+            "*.txt")
+        select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
+
+    static IEnumerable<TestCaseData> PrivateInputs<T>(string part)
+    {
+        var rootPath = Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH");
+        if (rootPath is not null)
+        {
+            var inputPath = GetTestFolder<T>(rootPath);
+            if (Directory.Exists(inputPath))
+            {
+                foreach (var path in Directory.EnumerateFiles(inputPath, "*.txt"))
+                {
+                    yield return new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
+                }
+            }
+        }
+    }
+
     public static void EnsureFolder(string path)
     {
         if (!Directory.Exists(path))
