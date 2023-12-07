@@ -6,11 +6,11 @@ namespace AdventOfCode;
 [TestFixture]
 public class Helpers
 {
-    static int Year = DateTime.Now.Year;
-    static int Day = DateTime.Now.Day;
+    //static int Year = DateTime.Now.Year;
+    //static int Day = DateTime.Now.Day;
 
-    //static int Year = 2015;
-    //static int Day = 1;
+    static int Year = 2015;
+    static int Day = 1;
 
     [Test, Explicit]
     public Task Setup()
