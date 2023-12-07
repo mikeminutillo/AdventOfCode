@@ -25,9 +25,12 @@ static class Extensions
     public static int Product(this IEnumerable<int> source)
         => source.Aggregate(1, (x, y) => x * y);
 
+    public static IEnumerable<string> GetDigitSets(this string source)
+        => from match in Regex.Matches(source, @"\d+") select match.Value;
+
     public static IEnumerable<int> ExtractNumbers(this string source)
-        => from match in Regex.Matches(source, @"\d+") select int.Parse(match.Value);
+        => source.GetDigitSets().Select(int.Parse);
 
     public static IEnumerable<long> ExtractLongNumbers(this string source)
-        => from match in Regex.Matches(source, @"\d+") select long.Parse(match.Value);
+        => source.GetDigitSets().Select(long.Parse);
 }

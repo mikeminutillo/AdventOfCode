@@ -17,14 +17,10 @@ public class Day06 : AdventOfCodeBase<Day06>
            select new Race(pair.First, pair.Second);
 
     static Race ParseRaceWithFixedKerning(string[] lines)
-        => new Race(
-                ExtractLongNumber(lines[0]),
-                ExtractLongNumber(lines[1])
+        => new(
+                long.Parse(string.Join(null, lines[0].GetDigitSets())),
+                long.Parse(string.Join(null, lines[1].GetDigitSets()))
             );
-
-    static long ExtractLongNumber(string input)
-        => long.Parse(new string(input.Where(char.IsDigit).ToArray()));
-
 
     record Race(long Time, long Distance)
     {
