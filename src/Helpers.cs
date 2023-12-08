@@ -10,7 +10,7 @@ public class Helpers
     //static int Day = DateTime.Now.Day;
 
     static int Year = 2015;
-    static int Day = 6;
+    static int Day = 7;
 
     [Test, Explicit]
     public Task Setup()
