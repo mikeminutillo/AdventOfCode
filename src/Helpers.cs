@@ -37,7 +37,7 @@ public class Helpers
             return;
         }
 
-        var outputDir = Utility.GetTestFolder(year, day, inputDir);;
+        var outputDir = Utility.GetTestFolder(year, day, inputDir);
         Utility.EnsureFolder(outputDir);
 
         using var handler = new HttpClientHandler { CookieContainer = cookieContainer };
@@ -59,11 +59,13 @@ public class Helpers
 
         if(!File.Exists(solverFilePath))
         {
-            await File.WriteAllTextAsync(solverFilePath, $@"namespace AdventOfCode._{year}._{day:00};
-
-public class {solverClassName} : AdventOfCodeBase<{solverClassName}>
-{{
-}}");
+            await File.WriteAllTextAsync(solverFilePath, $$"""
+                namespace AdventOfCode._{{year}}._{{day:00}};
+                
+                public class {{solverClassName}} : AdventOfCodeBase<{{solverClassName}}>
+                {
+                }
+                """);
         }
 
         var inputFolder = Path.Combine(testFolder, "Input");
