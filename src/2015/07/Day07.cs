@@ -7,26 +7,17 @@ using Circuit = ImmutableDictionary<string, ushort>;
 public class Day07 : AdventOfCodeBase<Day07>
 {
     public override object? Solution1(string input)
-        => string.Join(Environment.NewLine,
-            Sort(
-                Parse(input).ToArray()
-            )
-            .Aggregate(Circuit.Empty, (circuit, instruction) => instruction.Apply(circuit))
-            .OrderBy(x => x.Key)
-            .Select(x => $"{x.Key}: {x.Value}")
-        );
+        => Display(Sort(Parse(input))
+            .Aggregate(Circuit.Empty, (circuit, instruction) => instruction.Apply(circuit)));
 
     public override object? Solution2(string input)
+        => Display(Sort(Parse(input).Where(x => x.Output != "b").Concat(Parse("16076 -> b")))
+            .Aggregate(Circuit.Empty, (circuit, instruction) => instruction.Apply(circuit)));
+
+    static string Display(Circuit circuit)
         => string.Join(Environment.NewLine,
-            Sort(
-                Parse(input).Where(x => x.Output != "b")
-                            .Concat(Parse("16076 -> b"))
-                            .ToArray()
-            )
-            .Aggregate(Circuit.Empty, (circuit, instruction) => instruction.Apply(circuit))
-            .OrderBy(x => x.Key)
-            .Select(x => $"{x.Key}: {x.Value}")
-        );
+            circuit.OrderBy(x => x.Key)
+            .Select(x => $"{x.Key}: {x.Value}"));
 
     static IEnumerable<Instruction> Parse(string input)
         => from line in input.AsLines()
@@ -47,8 +38,8 @@ public class Day07 : AdventOfCodeBase<Day07>
     static Instruction Create(string[] wires, Func<ushort[], ushort> function)
         => new(wires[0..^1], wires[^1], function);
 
-    static IEnumerable<Instruction> Sort(Instruction[] instructions)
-        => TopologicalSort([], ImmutableArray.Create(instructions));
+    static IEnumerable<Instruction> Sort(IEnumerable<Instruction> instructions)
+        => TopologicalSort([], ImmutableArray.Create(instructions.ToArray()));
 
     static ImmutableArray<Instruction> TopologicalSort(ImmutableArray<Instruction> sorted, ImmutableArray<Instruction> unsorted)
         => unsorted is []
