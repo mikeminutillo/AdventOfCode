@@ -20,6 +20,20 @@ public class Day08 : AdventOfCodeBase<Day08>
         IEnumerable<string> Locations
             => Left.Keys;
 
+        // HINT: The recursive method requires tail recursion (which the C# compiler doesn't generate) or it stack overflows
+        //public long DistanceTravelled2(string start, Func<string, bool> endCheck)
+        //    => Locations.Contains(start) ? DistanceTravelledRecursive(start, endCheck, 0) : -1;
+
+        //public long DistanceTravelledRecursive(string current, Func<string, bool> destinationCheck, int distanceTravelled = 0)
+        //    => destinationCheck(current)
+        //        ? distanceTravelled
+        //        : DistanceTravelledRecursive(Directions[distanceTravelled % Directions.Length] switch
+        //        {
+        //            'L' => Left[current],
+        //            'R' => Right[current],
+        //            _ => current
+        //        }, destinationCheck, distanceTravelled + 1);
+
         public long DistanceTravelled(string start, Func<string, bool> destinationCheck)
         {
             if(Locations.Contains(start) == false)
