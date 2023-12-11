@@ -23,10 +23,10 @@ public class Day10 : AdventOfCodeBase<Day10>
     static Map MapInside(Map map)
         => MapInsideClean(map, FindLoop(map));
 
-    static Map MapInsideClean(Map map, HashSet<Point> loop)
+    static Map MapInsideClean(Map map, Loop loop)
         => MapInside(SimplifiedMap(map, loop), loop);
 
-    static Map MapInside(Map map, HashSet<Point> loop)
+    static Map MapInside(Map map, Loop loop)
         => (from y in Enumerable.Range(0, map.Length)
            select new string((from x in Enumerable.Range(0, map[y].Length)
                               let point = new Point(x, y)
@@ -34,7 +34,7 @@ public class Day10 : AdventOfCodeBase<Day10>
                                 ? '*'
                                 : map[y][x]).ToArray())).ToArray();
 
-    static bool IsInsideLoop(Map map, HashSet<Point> loop, Point point)
+    static bool IsInsideLoop(Map map, Loop loop, Point point)
         => !loop.Contains(point)
         && Enumerable.Range(1, Math.Max(point.X - 1, 0))
             .Aggregate(
@@ -43,9 +43,9 @@ public class Day10 : AdventOfCodeBase<Day10>
                     ? !inside
                     : inside);
 
-    static HashSet<Point> FindLoop(Map map)
+    static Loop FindLoop(Map map)
     {
-        var visited = new HashSet<Point>();
+        var visited = new Loop();
         var queue = new Queue<Point>();
         queue.Enqueue(FindStart(map));
         while(queue.TryDequeue(out var point))
@@ -60,7 +60,7 @@ public class Day10 : AdventOfCodeBase<Day10>
         return visited;
     }
 
-    static Map SimplifiedMap(Map map, HashSet<Point> keep)
+    static Map SimplifiedMap(Map map, Loop keep)
         => (from y in Enumerable.Range(0, map.Length)
             let row = map[y]
             select new string((from x in Enumerable.Range(0, row.Length)
@@ -109,7 +109,7 @@ public class Day10 : AdventOfCodeBase<Day10>
                 var c => throw new Exception($"Unknown map element {c}")
             };
 
-        public bool RequiresJumping(Map map, HashSet<Point> loop)
+        public bool RequiresJumping(Map map, Loop loop)
             => loop.Contains(this) && Adjacent(map).Contains(North);
     }
 }
