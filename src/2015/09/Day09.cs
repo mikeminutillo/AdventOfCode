@@ -31,9 +31,17 @@ public class Day09 : AdventOfCodeBase<Day09>
             : CheckAndExtendTrail(trails.RemoveAt(0), trails[0]);
 
         Journey? CheckAndExtendTrail(ImmutableArray<Journey> trails, Journey trail)
-            => Locations.Except(trail.LocationsCovered).IsEmpty
-            ? trail
-            : GetShortestJourney([.. trails.AddRange(GetExits(trail.CurrentLocation).Select(trail.Add)).Where(x => x.MaxLocationRepeats <= 2).OrderBy(x => x.DistanceTravelled)]);
+            => Locations.Except(trail.LocationsCovered) is { IsEmpty: false } remaining
+            ? GetShortestJourney(
+                [.. trails.AddRange(
+                        GetExits(trail.CurrentLocation)
+                            .Where(x => remaining.Contains(x.To))
+                            .Select(trail.Add)
+                    ).OrderBy(x => x.DistanceTravelled)
+
+                ])
+            : trail;
+
     }
 
     record Journey(ImmutableArray<Route> Steps)
