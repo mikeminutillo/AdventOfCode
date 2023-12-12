@@ -5,43 +5,51 @@ namespace AdventOfCode._2015._09;
 public class Day09 : AdventOfCodeBase<Day09>
 {
     public override object? Solution1(string input)
-        => Graph.Parse(input).ShortestJourney()?.DistanceTravelled;
+        => Graph.Parse(input).GetAllCoveringJourneys()
+            .OrderBy(x => x.DistanceTravelled)
+            .First().Dump()
+            .DistanceTravelled;
 
-    record Graph(ImmutableArray<Route> Edges, ImmutableHashSet<string> Locations)
+    public override object? Solution2(string input)
+        => Graph.Parse(input).GetAllCoveringJourneys()
+            .OrderByDescending(x => x.DistanceTravelled)
+            .First().Dump()
+            .DistanceTravelled;
+    
+    record Graph(ImmutableArray<Route> Edges)
     {
         public static Graph Parse(string input)
-            => Create(input.AsLines()
+            => new(input.AsLines()
                         .Select(Route.Parse)
                         .SelectMany(x => new[] { x, x.Reverse })
                         .ToImmutableArray());
 
-        static Graph Create(ImmutableArray<Route> edges)
-            => new(edges, edges.Aggregate(ImmutableHashSet.Create<string>(),
-                (set, route) => set.Union([route.From, route.To])));
+        ImmutableHashSet<string> GetLocationsExcept(params string[] exceptions)
+            => Edges.Aggregate(ImmutableHashSet.Create<string>(),
+                (set, route) => set.Union([route.From, route.To]))
+                    .Except(exceptions);
 
         IEnumerable<Route> GetExits(string location)
             => Edges.Where(x => x.From == location);
 
-        public Journey? ShortestJourney()
-            => GetShortestJourney([.. Edges.Select(Journey.Start).OrderBy(x => x.DistanceTravelled)]);
+        public IEnumerable<Journey> GetAllCoveringJourneys()
+            => from edge in Edges
+               from journey in GetAllCoveringJourneys(edge)
+               select journey;
 
-        Journey? GetShortestJourney(ImmutableArray<Journey> trails)
-            => trails.Length is 0
-            ? null
-            : CheckAndExtendTrail(trails.RemoveAt(0), trails[0]);
+        IEnumerable<Journey> GetAllCoveringJourneys(Route firstStep)
+            => GetAllCoveringJourneys(
+                Journey.Start(firstStep),
+                GetLocationsExcept(firstStep.From, firstStep.To)
+            );
 
-        Journey? CheckAndExtendTrail(ImmutableArray<Journey> trails, Journey trail)
-            => Locations.Except(trail.LocationsCovered) is { IsEmpty: false } remaining
-            ? GetShortestJourney(
-                [.. trails.AddRange(
-                        GetExits(trail.CurrentLocation)
-                            .Where(x => remaining.Contains(x.To))
-                            .Select(trail.Add)
-                    ).OrderBy(x => x.DistanceTravelled)
-
-                ])
-            : trail;
-
+        IEnumerable<Journey> GetAllCoveringJourneys(Journey journey, ImmutableHashSet<string> toVisit)
+            => toVisit.IsEmpty
+            ? [journey.Dump()]
+            : from exit in GetExits(journey.CurrentLocation)
+              where toVisit.Contains(exit.To)
+              from continuing in GetAllCoveringJourneys(journey.Add(exit), toVisit.Remove(exit.To))
+              select continuing;
     }
 
     record Journey(ImmutableArray<Route> Steps)
@@ -50,19 +58,10 @@ public class Day09 : AdventOfCodeBase<Day09>
             => Steps.Sum(x => x.Distance);
 
         public string CurrentLocation
-            => Steps.Last().To;
+            => Steps[^1].To;
 
         public Journey Add(Route route)
             => new(Steps.Add(route));
-
-        public ImmutableHashSet<string> LocationsCovered
-            => Steps.Aggregate(ImmutableHashSet.Create<string>(),
-                (set, route) => set.Union([route.From, route.To]));
-
-        public int MaxLocationRepeats => Steps.SelectMany(x => new[] { (location: x.To, count: 1), (location: x.From, count: 1) })
-            .GroupBy(x => x.location, x => x.count)
-            .Select(x => x.Sum())
-            .Max();
 
         public static Journey Start(Route firstStep)
             => new([firstStep]);
