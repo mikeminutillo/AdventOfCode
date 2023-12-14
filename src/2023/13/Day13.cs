@@ -12,7 +12,7 @@ public class Day13 : AdventOfCodeBase<Day13>
         => Solve(input, 1);
 
     long Solve(string input, int allowedSmudges)
-        => (from section in Section.Parse(input)
+        => (from section in Section.Parse(input).AsParallel()
             let solve = section.Solve(allowedSmudges)
             //let _ = $"\n\n{section}\n\n".Dump()
             select solve
