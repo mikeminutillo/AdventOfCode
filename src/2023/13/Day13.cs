@@ -13,19 +13,10 @@ public class Day13 : AdventOfCodeBase<Day13>
 
     long Solve(string input, int allowedSmudges)
         => (from section in Section.Parse(input)
-            let vm = section.VerticalMirror(allowedSmudges)
-            let hm = section.HorizontalMirror(allowedSmudges)
-            select vm + 100 * hm
+            let solve = section.Solve(allowedSmudges)
+            //let _ = $"\n\n{section}\n\n".Dump()
+            select solve
            ).Sum();
-
-    [TestCase(ExpectedResult =0)]
-    public int Foo()
-        => Section.Parse(File.ReadAllText(Path.Combine(Utility.GetTestFolder<Day13>(), "Input", "sample.txt")))
-            .First() switch
-            {
-                var section => Section.CheckMirror(0, 6, section.Row, 1).remainingSmudges
-            };
-
 
     record Section(string[] Map)
     {
@@ -40,57 +31,46 @@ public class Day13 : AdventOfCodeBase<Day13>
                 select Map[y][x]).ToImmutableArray();
 
         public ImmutableArray<char> Row(int y)
-            => Map[y].ToImmutableArray();
+            => [.. Map[y]];
 
-        public static ImmutableArray<char> FixNextSmudge(ImmutableArray<char> correct, ImmutableArray<char> smudged)
-            => correct.AsSpan().CommonPrefixLength(smudged.AsSpan()) switch
+        static int HowManySmudges(ImmutableArray<char> correct, ImmutableArray<char> smudged)
+            => correct.SequenceEqual(smudged)
+            ? 0
+            : correct.AsSpan().CommonPrefixLength(smudged.AsSpan()) switch
             {
-                var smudgePosition => smudged.RemoveAt(smudgePosition).Insert(smudgePosition, correct[smudgePosition])
+                var smudgePosition => 1 + HowManySmudges(correct, smudged.RemoveAt(smudgePosition).Insert(smudgePosition, correct[smudgePosition]))
             };
 
 
-       public static (bool isMirror, int remainingSmudges) CheckSections(ImmutableArray<char> a, ImmutableArray<char> b, int allowedSmudges)
-            => a.SequenceEqual(b) switch
+        static int GetSmudgesNeededForMirror(int lower, int upper, int length, Func<int, ImmutableArray<char>> getValues)
+        {
+            var totalSmudgeCount = 0;
+            while (lower >= 0 && upper < length)
             {
-                true => (true, allowedSmudges),
-                false => allowedSmudges > 0
-                            ? CheckSections(a, FixNextSmudge(a, b), allowedSmudges - 1)
-                            : (false, allowedSmudges)
-            };
+                var correct = getValues(lower);
+                var smudged = getValues(upper);
+                totalSmudgeCount += HowManySmudges(correct, smudged);
+                lower--;
+                upper++;
+            }
 
-        public static (bool isMirror, int remainingSmudges) CheckMirror(int a, int b, Func<int, ImmutableArray<char>> getValues, int requiredSmudges)
-            => //(a, b) == (a, b).Dump()
-            requiredSmudges < 0
-            ? (false, requiredSmudges)
-            : b <= a
-            ? (true, requiredSmudges)
-            //: getValues(a).SequenceEqual(getValues(b))
-            : CheckSections(getValues(a), getValues(b), requiredSmudges) switch
+            return totalSmudgeCount;
+        }
+
+        public static int CheckMirror(int length, Func<int, ImmutableArray<char>> getValues, int smudges)
+        {
+            for (var i = 1; i < length; i++)
             {
-                (true, var remainingSmudges) => CheckMirror(a + 1, b - 1, getValues, remainingSmudges),
-                (false, var remainingSmudges) => (false, remainingSmudges)
-            };
-            //: (false, requiredSmudges);
+                var x = GetSmudgesNeededForMirror(i - 1, i, length, getValues);
+                if (x == smudges) return i;
+            }
 
-        static int CheckMirror(int length, Func<int, ImmutableArray<char>> getValues, int requiredSmudges)
-            => (from smudge in Enumerable.Range(0, requiredSmudges + 1).Reverse()
-                from x in Enumerable.Range(0, length)
-                from offset in Enumerable.Range(0, 2) // [0, 1]
-                let width = Math.Min(x, length - (x + offset + 1))
-                where width + offset > 0
-                let left = x - width
-                let right = x + width + offset
-                let isMirror = CheckMirror(left, right, getValues, smudge)
-                let _ = $"Mirror of width {width} centered on {x} with offset {offset} from {left} to {right}: {isMirror}".Dump()
-                where isMirror.isMirror && isMirror.remainingSmudges == 0
-                select x + offset
-                ).FirstOrDefault();
+            return 0;
+        }
 
-        public int VerticalMirror(int requiredSmudges = 0)
-            => CheckMirror(Map[0].Length, Column, requiredSmudges);
-
-        public int HorizontalMirror(int requiredSmudges = 0)
-            => CheckMirror(Map.Length, Row, requiredSmudges);
+        public int Solve(int smudges)
+            => CheckMirror(Map[0].Length, Column, smudges) 
+            + 100 * CheckMirror(Map.Length, Row, smudges);
 
         public override string ToString()
             => string.Join(Environment.NewLine, Map);
