@@ -45,31 +45,26 @@ public class Day14 : AdventOfCodeBase<Day14>
     {
         (Platform newState, bool changed) TiltNorthOneStep()
         {
-            var newLines = Lines.Select(x => x.ToImmutableArray())
-                .ToList();
+            var newLines = Lines.Select(x => x.ToArray())
+                .ToArray();
             var changed = false;
 
-            for (var i = 0; i < newLines.Count - 1; i++)
+            for (var i = 0; i < newLines.Length - 1; i++)
             {
-                var currentLine = newLines[i].ToBuilder();
-                var nextLine = newLines[i + 1].ToBuilder();
-
-                for (var j = 0; j < currentLine.Count; j++)
+                for (var j = 0; j < newLines[i].Length; j++)
                 {
-                    if (currentLine[j] == '.' && nextLine[j] == 'O')
+                    if (newLines[i][j] == '.' && newLines[i + 1][j] == 'O')
                     {
-                        currentLine[j] = 'O';
-                        nextLine[j] = '.';
+                        newLines[i][j] = 'O';
+                        newLines[i+1][j] = '.';
                         changed = true;
                     }
                 }
-                newLines[i] = currentLine.ToImmutable();
-                newLines[i + 1] = nextLine.ToImmutable();
             }
 
             return (new Platform(
                 newLines.Select(
-                    x => new string(x.ToArray())
+                    x => new string(x)
                 ).ToArray()
             ), changed);
         }
