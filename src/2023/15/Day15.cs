@@ -44,36 +44,42 @@ public class Day15 : AdventOfCodeBase<Day15>
             => Hash(Lens) switch
             {
                 var hash => state.TryGetValue(hash, out var box)
-                    ? state.SetItem(hash, box.Apply(Lens, Operation))
-                    : state.SetItem(hash, Box.Create(hash).Apply(Lens, Operation))
+                    ? state.SetItem(hash, Apply(box))
+                    : state.SetItem(hash, Apply(Box.Create(hash)))
             };
+
+        Box Apply(Box box)
+            => Operation[0] switch
+                {
+                    '-' => box.RemoveLens(Lens),
+                    '=' => box.SetLens(Lens, int.Parse(Operation[1..])),
+                    var x => throw new Exception($"Unknown instruction {x}")
+                };
     }
 
     record Lens(string Code, int FocalLength);
 
     record Box(int Number, ImmutableArray<Lens> Lenses)
     {
-        public Box Apply(string lens, string instruction)
-            => instruction[0] switch
-            {
-                '-' => RemoveLens(lens),
-                '=' => SetLens(lens, int.Parse(instruction.Substring(1))),
-                var x => throw new Exception($"Unknown instruction {x}")
-            };
+        Lens? FindLens(string code)
+            => Lenses.FirstOrDefault(l => l.Code == code);
 
-        Box RemoveLens(string lens)
-            => new(Number, Lenses.FirstOrDefault(l => l.Code == lens) switch
+        public Box RemoveLens(string lens)
+            => new(Number, FindLens(lens) switch
             {
                 null => Lenses,
-                var l => Lenses.Remove(l)
+                var existingLens => Lenses.Remove(existingLens)
             });
 
-        Box SetLens(string lens, int focalLength)
-            => new(Number, Lenses.FirstOrDefault(l => l.Code == lens) switch
+        public Box SetLens(string lens, int focalLength)
+            => new Lens(lens, focalLength) switch
             {
-                null => Lenses.Add(new Lens(lens, focalLength)),
-                var l => Lenses.Replace(l, new Lens(lens, focalLength))
-            });
+                var newLens => new(Number, FindLens(lens) switch
+                {
+                    null => Lenses.Add(newLens),
+                    var existingLens => Lenses.Replace(existingLens, newLens)
+                })
+            };
 
         public static Box Create(int number)
             => new(number, []);
