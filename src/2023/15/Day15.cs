@@ -43,9 +43,10 @@ public class Day15 : AdventOfCodeBase<Day15>
         public ImmutableDictionary<int, Box> Apply(ImmutableDictionary<int, Box> state)
             => Hash(Lens) switch
             {
-                var hash => state.TryGetValue(hash, out var box)
-                    ? state.SetItem(hash, Apply(box))
-                    : state.SetItem(hash, Apply(Box.Create(hash)))
+                var hash => state.SetItem(
+                    hash,
+                    Apply(state.GetValueOrDefault(hash) ?? Box.Create(hash))
+                )
             };
 
         Box Apply(Box box)
