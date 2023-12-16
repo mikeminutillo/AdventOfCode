@@ -2,12 +2,23 @@ using System.Collections.Immutable;
 
 namespace AdventOfCode._2023._16;
 
+using static Direction;
+
+enum Direction
+{
+    North,
+    South,
+    East,
+    West
+}
+
 public class Day16 : AdventOfCodeBase<Day16>
 {
-    const string North = "North";
-    const string South = "South";
-    const string East = "East";
-    const string West = "West";
+    //const string North = "North";
+    //const string South = "South";
+    //const string East = "East";
+    //const string West = "West";
+
 
     public override object? Solution1(string input)
         => Map.Parse(input) switch
@@ -20,21 +31,20 @@ public class Day16 : AdventOfCodeBase<Day16>
             }
         };
 
-
     public override object? Solution2(string input)
-        => Map.Parse(input) switch
-        {
-            var map => (from edge in map.GetEdges().AsParallel()
-                        //let _ = $"{edge.entry}: {edge.direction}".Dump()
-                        let lightBeam = map.TrackLightBeam(edge.entry, edge.direction)
-                        select lightBeam.Count).Max().Dump()
-        };
+    => Map.Parse(input) switch
+    {
+        var map => (from edge in map.GetEdges().AsParallel()
+                    select map.TrackLightBeam(edge.entry, edge.direction)
+                                .Count
+                    ).Max().Dump()
+    };
 
-    static ImmutableDictionary<Point, ImmutableHashSet<string>> Display(Map map, ImmutableDictionary<Point, ImmutableHashSet<string>> light)
+    static Dictionary<Point, HashSet<Direction>> Display(Map map, Dictionary<Point, HashSet<Direction>> light)
     {
         string.Join(Environment.NewLine,
             from y in Enumerable.Range(0, map.Components.Length)
-            select string.Join(null, 
+            select string.Join(null,
                 from x in Enumerable.Range(0, map.Components[y].Length)
                 let point = new Point(x, y)
                 let component = map.At(point)
@@ -58,7 +68,7 @@ public class Day16 : AdventOfCodeBase<Day16>
                     (from y in Enumerable.Range(0, lines.Length)
                      let line = lines[y]
                      select (from x in Enumerable.Range(0, line.Length)
-                             select new Component(line[x])).ToImmutableArray()
+                             select Component.Build(line[x])).ToImmutableArray()
                      ).ToImmutableArray()
                 )
             };
@@ -80,22 +90,21 @@ public class Day16 : AdventOfCodeBase<Day16>
         public Component At(Point p)
             => Components[p.Y][p.X];
 
-        public ImmutableDictionary<Point, ImmutableHashSet<string>> TrackLightBeam(Point start, string direction)
+        public Dictionary<Point, HashSet<Direction>> TrackLightBeam(Point start, Direction direction)
         {
-            var visited = new Dictionary<Point, HashSet<string>>();
+            var visited = new Dictionary<Point, HashSet<Direction>>();
 
-            var toVisit = new Queue<(Point location, string direction)>();
+            var toVisit = new Queue<(Point location, Direction direction)>();
             toVisit.Enqueue((start, direction));
 
-            while(toVisit.TryDequeue(out var current))
+            while (toVisit.TryDequeue(out var current))
             {
-                if(!visited.TryGetValue(current.location, out var visitedDirections))
+                if (!visited.TryGetValue(current.location, out var visitedDirections))
                 {
                     visitedDirections = [];
                     visited.Add(current.location, visitedDirections);
                 }
-
-                if(visitedDirections.Contains(current.direction))
+                else if (visitedDirections.Contains(current.direction))
                 {
                     continue;
                 }
@@ -104,7 +113,7 @@ public class Day16 : AdventOfCodeBase<Day16>
 
                 var component = At(current.location);
 
-                foreach(var newDirection in component.AffectLight(current.direction))
+                foreach (var newDirection in component.AffectLight(current.direction))
                 {
                     var newLocation = current.location.Move(newDirection);
                     if (Contains(newLocation))
@@ -114,18 +123,18 @@ public class Day16 : AdventOfCodeBase<Day16>
                 }
             }
 
-            return visited.ToImmutableDictionary(x => x.Key, x => x.Value.ToImmutableHashSet());
+            return visited;
         }
 
-        public IEnumerable<(Point entry, string direction)> GetEdges()
+        public IEnumerable<(Point entry, Direction direction)> GetEdges()
         {
-            foreach(var x in Enumerable.Range(0, MaxX + 1))
+            foreach (var x in Enumerable.Range(0, MaxX + 1))
             {
                 yield return (new Point(x, 0), South);
                 yield return (new Point(x, MaxY), North);
             }
 
-            foreach(var y in Enumerable.Range(0, MaxY + 1))
+            foreach (var y in Enumerable.Range(0, MaxY + 1))
             {
                 yield return (new Point(0, y), East);
                 yield return (new Point(MaxX, y), West);
@@ -133,49 +142,61 @@ public class Day16 : AdventOfCodeBase<Day16>
         }
     }
 
-    record Component(char Symbol)
+    record Component(char Symbol, Dictionary<Direction, Direction[]> Operations)
     {
-        public ImmutableArray<string> AffectLight(string entry)
-            => Symbol switch
+        public Direction[] AffectLight(Direction entry)
+            => Operations.TryGetValue(entry, out var newDirections)
+            ? newDirections
+            : [entry];
+
+        public static Component Build(char c)
+            => library[c];
+
+        static readonly Dictionary<char, Component> library = new()
+        {
+            ['.'] = new('.', new Dictionary<Direction, Direction[]>
             {
-                '.' => [entry],
-                '/' => entry switch
-                {
-                    North => [East],
-                    South => [West],
-                    East => [North],
-                    West => [South],
-                    var x => throw new Exception($"Unknown direction {x}")
-                },
-                '\\' => entry switch
-                {
-                    North => [West],
-                    South => [East],
-                    East => [South],
-                    West => [North],
-                    var x => throw new Exception($"Unknown direction {x}")
-                },
-                '-' => entry switch
-                {
-                    East or West => [entry],
-                    North or South => [East, West],
-                    var x => throw new Exception($"Unknown direction {x}")
-                },
-                '|' => entry switch
-                {
-                    East or West => [North, South],
-                    North or South => [entry],
-                    var x => throw new Exception($"Unknown direction {x}")
-                },
-                var x => throw new Exception($"Unknown component {x}")
-            };
+                [North] = [North],
+                [South] = [South],
+                [West] = [West],
+                [East] = [East]
+            }),
+            ['/'] = new('/', new Dictionary<Direction, Direction[]>
+            {
+                [North] = [East],
+                [South] = [West],
+                [West] = [South],
+                [East] = [North]
+            }),
+            ['\\'] = new('\\', new Dictionary<Direction, Direction[]>
+            {
+                [North] = [West],
+                [South] = [East],
+                [West] = [North],
+                [East] = [South]
+            }),
+            ['-'] = new('-', new Dictionary<Direction, Direction[]>
+            {
+                [North] = [East, West],
+                [South] = [East, West],
+                [West] = [West],
+                [East] = [East]
+            }),
+            ['|'] = new('|', new Dictionary<Direction, Direction[]>
+            {
+                [North] = [North],
+                [South] = [South],
+                [West] = [North, South],
+                [East] = [North, South]
+            })
+        };
 
         public override string ToString() => $"{Symbol}";
     }
 
     record Point(int X, int Y)
     {
-        public Point Move(string direction)
+        public Point Move(Direction direction)
             => direction switch
             {
                 North => new(X, Y - 1),
