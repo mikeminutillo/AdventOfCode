@@ -14,12 +14,6 @@ enum Direction
 
 public class Day16 : AdventOfCodeBase<Day16>
 {
-    //const string North = "North";
-    //const string South = "South";
-    //const string East = "East";
-    //const string West = "West";
-
-
     public override object? Solution1(string input)
         => Map.Parse(input) switch
         {
@@ -145,9 +139,7 @@ public class Day16 : AdventOfCodeBase<Day16>
     record Component(char Symbol, Dictionary<Direction, Direction[]> Operations)
     {
         public Direction[] AffectLight(Direction entry)
-            => Operations.TryGetValue(entry, out var newDirections)
-            ? newDirections
-            : [entry];
+            => Operations[entry];
 
         public static Component Build(char c)
             => library[c];
