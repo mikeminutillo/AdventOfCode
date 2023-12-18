@@ -13,7 +13,7 @@ public abstract class AdventOfCodeBase<T>
 
     public virtual object? Solution2(string input) => default;
 
-    [TestCaseSource(nameof(AllInputs), ["Part1"])]
+    [TestCaseSource(nameof(AllInputs), ["Part1"]), CancelAfter(2000)]
     public void Part1(string path)
     {
         var input = File.ReadAllText(path).Replace("\r\n", "\n");
