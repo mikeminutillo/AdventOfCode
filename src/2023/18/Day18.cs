@@ -42,12 +42,14 @@ public class Day18 : AdventOfCodeBase<Day18>
     static long PitSize(ImmutableArray<Point> vertices, long boundary)
         => ShoelaceFormula(vertices) switch
         {
+            // https://en.wikipedia.org/wiki/Pick%27s_theorem
             var area => (area - boundary / 2 + 1) switch
             {
                 var interior => boundary + interior
             }
         };
 
+    // https://en.wikipedia.org/wiki/Shoelace_formula
     static long ShoelaceFormula(ImmutableArray<Point> vertices) 
         => Math.Abs(
             Enumerable.Zip(vertices, vertices[1..].Add(vertices[0]))
