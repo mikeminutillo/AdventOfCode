@@ -29,6 +29,25 @@ public class Day20 : AdventOfCodeBase<Day20>
     //    return i.Dump();
     //}
 
+    public override object? Solution2(string input)
+        => ModuleNetwork.Parse(input) switch
+        {
+            var network => network.GetInputs("dd") switch
+            {
+                var inputs => inputs.Any()
+                    ? (from inputModule in inputs.AsParallel()
+                       let machineCopy = ModuleNetwork.Parse(input)
+                       let ttf = machineCopy.TimeToFirst(inputModule, High)
+                       select new KeyValuePair<string, int>(inputModule, ttf)).ToDictionary() switch
+                    {
+                        var dic => dic.Values.Aggregate(1L, (a, b) => a * b)
+                    }
+                    : "Does not work on sample data"
+            }
+            
+            
+        };
+
 
 
     class ModuleNetwork
@@ -59,6 +78,10 @@ public class Day20 : AdventOfCodeBase<Day20>
             }
         }
 
+        public IEnumerable<string> GetInputs(string module)
+            => modules.Values.Where(m => m.Outputs.Contains(module))
+                    .Select(m => m.Name);
+
         public (long Low, long High) PulseCount { get; private set; }
 
         public ModuleNetwork PushButton(int times)
@@ -66,12 +89,27 @@ public class Day20 : AdventOfCodeBase<Day20>
             for(var i = 0; i < times; i++)
             {
                 $"PUSH BUTTON COUNT {i + 1} * * * * * * * * * * * * * * * * * * * * * *".Dump();
-                PushButtonOnce();
+                PushButtonOnce().ToArray();
             }
             return this;
         }
 
-        public ModuleNetwork PushButtonOnce()
+        public int TimeToFirst(string module, string type)
+        {
+            for(var i = 1; ; i++)
+            {
+                var pulses = PushButtonOnce().ToArray();
+                foreach(var pulse in pulses)
+                {
+                    if(pulse.Source == module && pulse.Type == type)
+                    {
+                        return i;
+                    }
+                }
+            }
+        }
+
+        IEnumerable<Pulse> PushButtonOnce()
         {
             var queue = new Queue<Pulse>();
             queue.Enqueue(new Pulse("button", "low", "broadcaster"));
@@ -87,6 +125,7 @@ public class Day20 : AdventOfCodeBase<Day20>
                 };
 
                 LatestPulse[pulse.Destination] = pulse.Type;
+                yield return pulse;
 
                 if(modules.TryGetValue(pulse.Destination, out var module))
                 {
@@ -96,7 +135,6 @@ public class Day20 : AdventOfCodeBase<Day20>
                     }
                 }
             }
-            return this;
         }
 
         public Dictionary<string, string> LatestPulse { get; } = [];
