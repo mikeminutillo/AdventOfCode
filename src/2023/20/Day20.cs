@@ -13,21 +13,21 @@ public class Day20 : AdventOfCodeBase<Day20>
             (var low, var high) => (low * high).Dump()
         };
 
-    public override object? Solution2(string input)
-    {
-        var network = ModuleNetwork.Parse(input);
-        var i = 1;
-        while(true)
-        {
-            network.PushButtonOnce();
-            i++;
-            if (network.LatestPulse["rx"] == Low)
-            {
-                break;
-            }
-        }
-        return i.Dump();
-    }
+    //public override object? Solution2(string input)
+    //{
+    //    var network = ModuleNetwork.Parse(input);
+    //    var i = 1;
+    //    while(true)
+    //    {
+    //        network.PushButtonOnce();
+    //        i++;
+    //        if (network.LatestPulse["rx"] == Low)
+    //        {
+    //            break;
+    //        }
+    //    }
+    //    return i.Dump();
+    //}
 
 
 
