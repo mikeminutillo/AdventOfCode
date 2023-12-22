@@ -85,15 +85,32 @@ public class Day21 : AdventOfCodeBase<Day21>
                    select adjacent
             ];
 
+        ImmutableHashSet<Point> ReachableBorder(ImmutableHashSet<Point> inside, ImmutableHashSet<Point> border)
+            => [.. from location in border.AsParallel()
+                   from adjacent in location.Adjacent
+                   where inside.Contains(adjacent) == false
+                   let translated = adjacent.TranslateTo(MaxX, MaxY)
+                   where Rocks.Contains(translated) == false
+                   select adjacent];
+
         public long CalculateReachableFrom(int steps)
         {
+            var border = new List<ImmutableHashSet<Point>>();
+            var reached = new List<ImmutableHashSet<Point>>();
+
+            // Prime the trackers
+            var firstBorder = ReachableBorder([], [Start]);
+            var secondBorder = ReachableBorder([], firstBorder);
+            border.Add(firstBorder);
+            reached.Add(firstBorder);
+            border.Add(secondBorder);
+            reached.Add(secondBorder);
+            var step = 2;
+
+            var runResults = new List<(int Steps, int Count)>();
             // NOTE: Assumes the cycle of steps reachable repeats after 3 rings
             // Which it does for the input
-            var runs = 3;
-            var runResults = new List<(int Steps, int Count)>();
-            var visited = ImmutableHashSet.Create(Start);
-            var step = 0;
-            for (var run = 0; run < runs; run++)
+            for (var run = 0; run < 3; run++)
             {
                 using var _ = Track.Time($"Run {run + 1}");
                 // NOTE: Assumes a square map!
@@ -101,9 +118,11 @@ public class Day21 : AdventOfCodeBase<Day21>
                 var limit = run * (MaxX + 1) + (MaxX / 2);
                 for (; step < limit; step++)
                 {
-                    visited = Reachable(visited, infiniteMap: true);
+                    border.Add(ReachableBorder(reached[step - 2], border[step - 1]));
+                    reached.Add(reached[step - 2].Union(border[step]));
                 }
-                runResults.Add((step, visited.Count));
+                runResults.Add((step, reached[^1].Count));
+                $"{step}: {reached[^1].Count}".Dump();
             }
 
             return (long)LagrangeInterpolation(runResults.ToArray(), steps);
