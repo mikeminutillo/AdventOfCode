@@ -13,22 +13,6 @@ public class Day20 : AdventOfCodeBase<Day20>
             (var low, var high) => (low * high).Dump()
         };
 
-    //public override object? Solution2(string input)
-    //{
-    //    var network = ModuleNetwork.Parse(input);
-    //    var i = 1;
-    //    while(true)
-    //    {
-    //        network.PushButtonOnce();
-    //        i++;
-    //        if (network.LatestPulse["rx"] == Low)
-    //        {
-    //            break;
-    //        }
-    //    }
-    //    return i.Dump();
-    //}
-
     public override object? Solution2(string input)
         => ModuleNetwork.Parse(input) switch
         {
@@ -44,11 +28,7 @@ public class Day20 : AdventOfCodeBase<Day20>
                     }
                     : "Does not work on sample data"
             }
-            
-            
         };
-
-
 
     class ModuleNetwork
     {
@@ -180,7 +160,7 @@ public class Day20 : AdventOfCodeBase<Day20>
             => SendToAll(pulse.Type);
     }
 
-    class FlipFlop(string name, string[] outputs) : ModuleBase(name, outputs)
+    class FlipFlop(string flipFlopName, string[] outputs) : ModuleBase(flipFlopName, outputs)
     {
         bool isOn = false;
 
@@ -196,7 +176,7 @@ public class Day20 : AdventOfCodeBase<Day20>
         }
     }
 
-    class Conjunction(string name, string[] outputs) : ModuleBase(name, outputs)
+    class Conjunction(string conjunctionName, string[] outputs) : ModuleBase(conjunctionName, outputs)
     {
         // Note to self. We might need to preload these with all inputs
         Dictionary<string, string> memory = [];
@@ -205,7 +185,7 @@ public class Day20 : AdventOfCodeBase<Day20>
         {
             foreach(var module in values)
             {
-                if(module.Outputs.Contains(name))
+                if(module.Outputs.Contains(Name))
                 {
                     memory[module.Name] = Low;
                 }
