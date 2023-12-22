@@ -95,16 +95,16 @@ public class Day21 : AdventOfCodeBase<Day21>
 
         public long CalculateReachableFrom(int steps)
         {
-            var border = new List<ImmutableHashSet<Point>>();
-            var reached = new List<ImmutableHashSet<Point>>();
+            var border = new ImmutableHashSet<Point>[3];
+            var reached = new ImmutableHashSet<Point>[3];
 
             // Prime the trackers
             var firstBorder = ReachableBorder([], [Start]);
             var secondBorder = ReachableBorder([], firstBorder);
-            border.Add(firstBorder);
-            reached.Add(firstBorder);
-            border.Add(secondBorder);
-            reached.Add(secondBorder);
+            border[0] = firstBorder;
+            reached[0] = firstBorder;
+            border[1] = secondBorder;
+            reached[1] = secondBorder;
             var step = 2;
 
             var runResults = new List<(int Steps, int Count)>();
@@ -118,11 +118,14 @@ public class Day21 : AdventOfCodeBase<Day21>
                 var limit = run * (MaxX + 1) + (MaxX / 2);
                 for (; step < limit; step++)
                 {
-                    border.Add(ReachableBorder(reached[step - 2], border[step - 1]));
-                    reached.Add(reached[step - 2].Union(border[step]));
+                    // Keep track of the border and the reached separately
+                    // Only explore the border
+                    // We need to keep multiple sets to track odd and even
+                    border[step % 3] = ReachableBorder(reached[(step - 2) % 3], border[(step - 1) % 3]);
+                    reached[step % 3] = reached[(step - 2) % 3].Union(border[step % 3]);
                 }
-                runResults.Add((step, reached[^1].Count));
-                $"{step}: {reached[^1].Count}".Dump();
+                runResults.Add((step, reached[(step - 1) % 3].Count));
+                $"{step}: {reached[(step - 1) % 3].Count}".Dump();
             }
 
             return (long)LagrangeInterpolation(runResults.ToArray(), steps);
