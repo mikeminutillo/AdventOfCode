@@ -2,19 +2,19 @@ using System.Collections.Immutable;
 
 namespace AdventOfCode._2024._01;
 
-public partial class Day01 : AdventOfCodeBase<Day01>
+public class Day01 : AdventOfCodeBase<Day01>
 {
-
     public override object? Solution1(string input)
-        => GetLists(input.AsLines()) switch
+        => GetLists(input) switch
         {
-            var (a, b) => a.Sort()
-                           .Zip(b.Sort())
-                           .Sum(x => Math.Abs(x.First - x.Second))
+            var (a, b) => Enumerable.Zip(
+                a.Sort(), 
+                b.Sort()
+            ).Sum(x => Math.Abs(x.First - x.Second))
         };
 
     public override object? Solution2(string input)
-        => GetLists(input.AsLines()) switch
+        => GetLists(input) switch
         {
             var (a, b) => b.ToLookup(x => x) switch
             {
@@ -23,21 +23,18 @@ public partial class Day01 : AdventOfCodeBase<Day01>
         };
 
 
-    static (ImmutableArray<long> a, ImmutableArray<long> b) GetLists(string[] lines)
-        => lines.Select(x => Numbers().Matches(x).Select(x => long.Parse(x.Value)))
+    static (ImmutableArray<long> a, ImmutableArray<long> b) GetLists(string input)
+        => input
+        .AsLines()
+        .Select(x => x.ExtractLongNumbers().ToArray())
         .Aggregate(
             (
                 a: ImmutableArray.Create<long>(),
                 b: ImmutableArray.Create<long>()
             ), 
             (acc, val) => (
-                acc.a.Add(val.First()),
-                acc.b.Add(val.Last())
+                [.. acc.a, val[0]],
+                [.. acc.b, val[^1]]
             )
         );
-
-    
-
-    [GeneratedRegex(@"\d+")]
-    private static partial Regex Numbers();
 }
