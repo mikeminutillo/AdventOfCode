@@ -25,7 +25,7 @@ public class Day02 : AdventOfCodeBase<Day02>
                       .ToArray() switch
                       {
                           var diffs => diffs.Select(Math.Sign).Distinct().Count() == 1
-                                    && diffs.All(x => Math.Abs(x) is > 0 and <= 3)
+                                    && diffs.Select(Math.Abs).All(x => x is > 0 and <= 3)
                       };
 
         public bool IsSafeWithDampener =>
