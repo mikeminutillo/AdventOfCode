@@ -6,26 +6,28 @@ static class Utility
         LocalInputs<T>(part).Concat(PrivateInputs<T>(part));
 
     static IEnumerable<TestCaseData> LocalInputs<T>(string part) =>
-        from path in Directory.EnumerateFiles(
-            Path.Combine(GetTestFolder<T>(), "Input"),
-            "*.txt")
-        select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
+        Path.Combine(GetTestFolder<T>(), "Input") switch
+        {
+            var localInputFolder => GetInputs(localInputFolder, part)
+        };
 
     static IEnumerable<TestCaseData> PrivateInputs<T>(string part)
-    {
-        var rootPath = Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH");
-        if (rootPath is not null)
+        => Environment.GetEnvironmentVariable("ADVENT_OF_CODE_INPUT_PATH") switch
         {
-            var inputPath = GetTestFolder<T>(rootPath);
-            if (Directory.Exists(inputPath))
+            null => [],
+            var rootPath => GetTestFolder<T>(rootPath) switch
             {
-                foreach (var path in Directory.EnumerateFiles(inputPath, "*.txt"))
-                {
-                    yield return new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}");
-                }
+                var inputPath => GetInputs(inputPath, part)
             }
-        }
-    }
+        };
+
+    static IEnumerable<TestCaseData> GetInputs(string folder, string part)
+        => Directory.Exists(folder)
+        ? [
+            .. from path in Directory.EnumerateFiles(folder, "*.txt")
+               select new TestCaseData(path).SetName($"{part}.{Path.GetFileNameWithoutExtension(path)}")
+          ]
+        : [];
 
     public static void EnsureFolder(string path)
     {
@@ -36,11 +38,11 @@ static class Utility
     }
 
     public static string GetTestFolder<T>(string? root = null)
-        => GetTestFolder(
-                typeof(T).Namespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')).First(),
-                typeof(T).Namespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')).Last(),
-                root
-            );
+        => typeof(T).Namespace!.Split('.').Skip(1).Select(x => x.TrimStart('_')).ToArray() switch
+        {
+        [var year, var day] => GetTestFolder(year, day, root),
+            _ => throw new Exception($"Unknown namespace: {typeof(T).FullName}")
+        };
 
     public static string GetTestFolder(int year, int day, string? root = null)
         => GetTestFolder(
