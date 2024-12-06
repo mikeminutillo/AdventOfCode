@@ -22,24 +22,14 @@ public class Day05 : AdventOfCodeBase<Day05>
     record PrinterState(ImmutableArray<PageOrderRule> Rules, ImmutableArray<PageUpdate> Updates)
     {
         public static PrinterState Parse(string input)
-            => input.AsLines()
-            .Aggregate(
-                new PrinterState([], []),
-                (state, line) => (line.Contains('|'), line.Contains(',')) switch
-                    {
-                        (false, true) => state with
-                        {
-                            Updates = state.Updates.Add(PageUpdate.Parse(line)),
-                        },
-                        (true, false) => state with
-                        {
-                            Rules = state.Rules.Add(PageOrderRule.Parse(line)),
-                        },
-                        (false, false) => state,
-                        (true, true) => throw new Exception()
-                    }
-            );
-
+            => input.Split("\n\n") switch
+            {
+                [var rules, var updates] => new(
+                    [.. rules.AsLines().Select(PageOrderRule.Parse)],
+                    [.. updates.AsLines().Select(PageUpdate.Parse)]
+                ),
+                _ => throw new Exception()
+            };
         public IEnumerable<PageUpdate> FindAllCorrectOrder()
             => from update in Updates
                where Rules.All(update.Satisfies)
