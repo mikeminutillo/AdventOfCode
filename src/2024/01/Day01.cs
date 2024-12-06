@@ -16,9 +16,9 @@ public class Day01 : AdventOfCodeBase<Day01>
     public override object? Solution2(string input)
         => GetLists(input) switch
         {
-            var (a, b) => b.ToLookup(x => x) switch
+            var (a, b) => b.CountBy(x => x).ToDictionary() switch
             {
-                var lookup => a.Sum(x => x * lookup[x].Count())
+                var counts => a.Sum(x => x * counts.GetValueOrDefault(x))
             }
         };
 
