@@ -25,8 +25,11 @@ public partial class Day03 : AdventOfCodeBase<Day03>
     int Solve(Regex regex, string input)
         => regex.Matches(input)
                 .Select(Parse)
-                .Aggregate(new ProgramState(), (state, op) => op.Execute(state))
-                .Accumulator;
+                .Aggregate(
+                    new ProgramState(),
+                    (state, op) => op.Execute(state), 
+                    state => state.Accumulator
+                );
 
     record ProgramState(bool MulEnabled = true, int Accumulator = 0);
 
