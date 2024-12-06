@@ -3,7 +3,6 @@ namespace AdventOfCode._2024._04;
 
 public class Day04 : AdventOfCodeBase<Day04>
 {
-
     public override object? Solution1(string input)
         => new WordSearch(input.AsLines())
             .FindWords("XMAS")
