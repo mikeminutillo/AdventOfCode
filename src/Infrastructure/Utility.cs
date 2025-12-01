@@ -65,7 +65,7 @@ static class Utility
         {
             currentDir = Path.GetDirectoryName(currentDir)
                     ?? throw new Exception("No solution file found");
-            if (Directory.EnumerateFiles(currentDir, "*.sln").Any())
+            if (Directory.EnumerateFiles(currentDir, "*.slnx").Any())
             {
                 return currentDir;
             }
