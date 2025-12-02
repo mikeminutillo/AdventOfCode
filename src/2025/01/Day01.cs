@@ -4,18 +4,32 @@ public class Day01 : AdventOfCodeBase<Day01>
 {
     public override object? Solution1(string input)
         => input.AsLines()
-            .Aggregate<string, DialPosition[][], int>(
-                [[new DialPosition()]],
-                (state, instruction) => [..state, [.. state[^1][^1].Follow(instruction)]], 
-                state => state.Count(x => x[^1].Position == 0)
+            .Aggregate(
+                (position: new DialPosition(50), count: 0),
+                (state, instruction) => state.position.Follow(instruction).Last() switch
+                {
+                    var finalPosition => (
+                        finalPosition,
+                        finalPosition.Position == 0
+                            ? state.count + 1
+                            : state.count
+                    )
+                },
+                state => state.count
             );
 
     public override object? Solution2(string input)
         => input.AsLines()
-            .Aggregate<string, DialPosition[], int>(
-                [new DialPosition()],
-                (state, instruction) => [.. state, .. state[^1].Follow(instruction)],
-                state => state.Count(x => x.Position == 0)
+            .Aggregate(
+                (position: new DialPosition(50), count: 0),
+                (state, instruction) => state.position.Follow(instruction).ToArray() switch
+                {
+                    var positions => (
+                        positions.Last(),
+                        state.count + positions.Count(p => p.Position == 0)
+                    )
+                },
+                state => state.count
             );
 
     record DialPosition(int Position = 50)
@@ -29,8 +43,8 @@ public class Day01 : AdventOfCodeBase<Day01>
         public IEnumerable<DialPosition> Follow(string instruction)
             => (instruction[0], int.Parse(instruction[1..])) switch
             {
-                ('L', int steps) => this.Apply(p => p.TurnLeft(), steps),
-                ('R', int steps) => this.Apply(p => p.TurnRight(), steps),
+                ('L', int steps) => this.Unfold(p => p.TurnLeft()).Take(steps),
+                ('R', int steps) => this.Unfold(p => p.TurnRight()).Take(steps),
                 _ => throw new Exception($"Unknown instruction: {instruction}")
             };
     }

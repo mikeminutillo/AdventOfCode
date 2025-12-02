@@ -37,20 +37,16 @@ static class Extensions
     public static IEnumerable<(int rank, T item)> Ranked<T>(this IEnumerable<T> source)
         => source.Select((item, index) => (index + 1, item));
 
-    extension<T>(T current)
+    extension<T>(T seed)
     {
-        public IEnumerable<T> Apply(Func<T, T> next, int count)
-            => current.Apply(next, count, []);
-
-        private IEnumerable<T> Apply(Func<T, T> next, int count, IEnumerable<T> accumulator)
-            => count switch
+        public IEnumerable<T> Unfold(Func<T, T> next)
+        {
+            var current = next(seed);
+            while(true)
             {
-                < 0 => throw new ArgumentOutOfRangeException(nameof(count), "Count must be non-negative."),
-                0 => accumulator,
-                var c => next(current) switch
-                {
-                    var nextValue => Apply(nextValue, next, c - 1, accumulator.Append(nextValue))
-                }
-            };
+                yield return current;
+                current = next(current);
+            }
+        }
     }
 }
