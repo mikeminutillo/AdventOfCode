@@ -4,38 +4,33 @@ namespace AdventOfCode;
 
 static class Extensions
 {
-    public static T Dump<T>(this T obj)
+    extension<T>(IEnumerable<T> source)
     {
-        TestContext.Out.WriteLine(obj switch
-        {
-            // HINT: String is Enumerable
-            string o => o?.ToString(),
-            IEnumerable enumerable => string.Join(", ", enumerable.Cast<object>()),
-            var o => o?.ToString()
-        });
-        return obj;
+        public int Product(Func<T, int> selector)
+            => source.Aggregate(1, (x, y) => x * selector(y));
+
+        public IEnumerable<(int rank, T item)> Ranked()
+            => source.Select((item, index) => (index + 1, item));
     }
 
-    public static string[] AsLines(this string input)
-        => input.Trim().Split("\n");
+    extension(IEnumerable<int> source)
+    {
+        public int Product() => source.Aggregate(1, (x, y) => x * y);
+    }
 
-    public static int Product<T>(this IEnumerable<T> source, Func<T, int> selector)
-        => source.Aggregate(1, (x, y) =>  x * selector(y));
+    extension(string source)
+    {
+        public string[] AsLines() => source.Trim().Split('\n');
 
-    public static int Product(this IEnumerable<int> source)
-        => source.Aggregate(1, (x, y) => x * y);
+        public IEnumerable<string> GetDigitSets()
+            => from match in Regex.Matches(source, @"\d+") select match.Value;
 
-    public static IEnumerable<string> GetDigitSets(this string source)
-        => from match in Regex.Matches(source, @"\d+") select match.Value;
+        public IEnumerable<int> ExtractNumbers()
+            => source.GetDigitSets().Select(int.Parse);
 
-    public static IEnumerable<int> ExtractNumbers(this string source)
-        => source.GetDigitSets().Select(int.Parse);
-
-    public static IEnumerable<long> ExtractLongNumbers(this string source)
-        => source.GetDigitSets().Select(long.Parse);
-
-    public static IEnumerable<(int rank, T item)> Ranked<T>(this IEnumerable<T> source)
-        => source.Select((item, index) => (index + 1, item));
+        public IEnumerable<long> ExtractLongNumbers()
+            => source.GetDigitSets().Select(long.Parse);
+    }
 
     extension<T>(T seed)
     {
@@ -47,6 +42,18 @@ static class Extensions
                 yield return current;
                 current = next(current);
             }
+        }
+
+        public T Dump()
+        {
+            TestContext.Out.WriteLine(seed switch
+            {
+                // HINT: String is Enumerable
+                string o => o?.ToString(),
+                IEnumerable enumerable => string.Join(", ", enumerable.Cast<object>()),
+                var o => o?.ToString()
+            });
+            return seed;
         }
     }
 }
