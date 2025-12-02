@@ -13,7 +13,7 @@ public class Day06 : AdventOfCodeBase<Day06>
         => ParseRaces(input.AsLines());
 
     static IEnumerable<Race> ParseRaces(string[] lines)
-        => from pair in Enumerable.Zip(lines[0].ExtractNumbers(), lines[1].ExtractNumbers())
+        => from pair in Enumerable.Zip(lines[0].ExtractNumbers<int>(), lines[1].ExtractNumbers<int>())
            select new Race(pair.First, pair.Second);
 
     static Race ParseRaceWithFixedKerning(string[] lines)

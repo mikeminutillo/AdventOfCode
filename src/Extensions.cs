@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Linq;
+using System.Numerics;
 
 namespace AdventOfCode;
 
@@ -6,16 +8,16 @@ static class Extensions
 {
     extension<T>(IEnumerable<T> source)
     {
-        public int Product(Func<T, int> selector)
-            => source.Aggregate(1, (x, y) => x * selector(y));
+        public N Product<N>(Func<T, N> selector) where N : INumber<N>
+            => source.Aggregate(N.MultiplicativeIdentity, (x, y) => x * selector(y));
 
         public IEnumerable<(int rank, T item)> Ranked()
             => source.Select((item, index) => (index + 1, item));
     }
 
-    extension(IEnumerable<int> source)
+    extension<T>(IEnumerable<T> source) where T : INumber<T>
     {
-        public int Product() => source.Aggregate(1, (x, y) => x * y);
+        public T Product() => source.Aggregate(T.MultiplicativeIdentity, (x, y) => x * y);
     }
 
     extension(string source)
@@ -25,11 +27,8 @@ static class Extensions
         public IEnumerable<string> GetDigitSets()
             => from match in Regex.Matches(source, @"\d+") select match.Value;
 
-        public IEnumerable<int> ExtractNumbers()
-            => source.GetDigitSets().Select(int.Parse);
-
-        public IEnumerable<long> ExtractLongNumbers()
-            => source.GetDigitSets().Select(long.Parse);
+        public IEnumerable<T> ExtractNumbers<T>() where T : INumber<T>
+            => source.GetDigitSets().Select(n => T.Parse(n, null));
     }
 
     extension<T>(T seed)

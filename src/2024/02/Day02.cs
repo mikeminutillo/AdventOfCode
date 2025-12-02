@@ -17,7 +17,7 @@ public class Day02 : AdventOfCodeBase<Day02>
     record Report(ImmutableArray<int> Levels)
     {
         public static Report Parse(string text)
-            => new(text.ExtractNumbers().ToImmutableArray());
+            => new(text.ExtractNumbers<int>().ToImmutableArray());
 
         public bool IsSafe =>
             Enumerable.Zip(Levels[..^1], Levels[1..])

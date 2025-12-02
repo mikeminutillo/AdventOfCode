@@ -25,7 +25,7 @@ class Day04 : AdventOfCodeBase<Day04>
     IEnumerable<ScratchCard> GetCards(string input)
         => from line in input.AsLines()
            let split = (from section in line.Split([.. ":|"])
-                        select section.ExtractNumbers().ToArray()
+                        select section.ExtractNumbers<int>().ToArray()
                        ).ToArray()
            let cardNumber = split[0].Single()
            let winningNumbers = split[1]

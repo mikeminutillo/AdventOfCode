@@ -44,7 +44,7 @@ public class Day05 : AdventOfCodeBase<Day05>
     record PageOrderRule(int Left, int Right)
     {
         public static PageOrderRule Parse(string input)
-            => input.ExtractNumbers().ToArray() switch
+            => input.ExtractNumbers<int>().ToArray() switch
             {
                 [var left, var right] => new(left, right),
                 _ => throw new Exception()
@@ -61,7 +61,7 @@ public class Day05 : AdventOfCodeBase<Day05>
     record PageUpdate(ImmutableArray<int> PagesToUpdate)
     {
         public static PageUpdate Parse(string input)
-            => new(input.ExtractNumbers().ToImmutableArray());
+            => new(input.ExtractNumbers<int>().ToImmutableArray());
 
         public int MiddlePageNumber
             => PagesToUpdate[PagesToUpdate.Length / 2];

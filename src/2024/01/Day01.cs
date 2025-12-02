@@ -26,7 +26,7 @@ public class Day01 : AdventOfCodeBase<Day01>
     static (ImmutableArray<long> a, ImmutableArray<long> b) GetLists(string input)
         => input
         .AsLines()
-        .Select(x => x.ExtractLongNumbers().ToArray())
+        .Select(x => x.ExtractNumbers<long>().ToArray())
         .Aggregate(
             (
                 a: ImmutableArray.Create<long>(),

@@ -21,11 +21,11 @@ public class Day05 : AdventOfCodeBase<Day05>
             var sections = input.Split($"\n\n");
             var seeds = treatSeedsLineAsRanges 
                 ? sections[0]
-                    .ExtractLongNumbers()
+                    .ExtractNumbers<long>()
                     .Chunk(2)
                     .Select(x => new Range(x[0], x[0] + x[1] - 1))
                     .ToArray()
-                : sections[0].ExtractLongNumbers()
+                : sections[0].ExtractNumbers<long>()
                     .Select(x => new Range(x, x))
                     .ToArray();
             var maps = sections.Skip(1).Select(AlmanacMap.Parse).ToArray();
@@ -88,7 +88,7 @@ public class Day05 : AdventOfCodeBase<Day05>
     {
         public static AlmanacMapping Parse(string input)
         {
-            var nums = input.ExtractLongNumbers().ToArray();
+            var nums = input.ExtractNumbers<long>().ToArray();
             var destinationStart = nums[0];
             var sourceStart = nums[1];
             var length = nums[2];

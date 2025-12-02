@@ -32,7 +32,7 @@ public class Day12 : AdventOfCodeBase<Day12>
         static SpringReport Create(string[] strings)
             => new(
                 strings[0],
-                strings[1].ExtractNumbers().ToImmutableArray()
+                strings[1].ExtractNumbers<int>().ToImmutableArray()
                 );
 
         public SpringReport Unfold(int times)
