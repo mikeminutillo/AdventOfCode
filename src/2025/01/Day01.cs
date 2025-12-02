@@ -32,7 +32,7 @@ public class Day01 : AdventOfCodeBase<Day01>
                 state => state.count
             );
 
-    record DialPosition(int Position = 50)
+    record DialPosition(int Position)
     {
         public DialPosition TurnLeft()
             => new((Position - 1) % 100);
