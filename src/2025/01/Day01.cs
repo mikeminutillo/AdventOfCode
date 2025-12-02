@@ -35,10 +35,10 @@ public class Day01 : AdventOfCodeBase<Day01>
     record DialPosition(int Position = 50)
     {
         public DialPosition TurnLeft()
-            => new(Position == 0 ? 99 : Position - 1);
+            => new((Position - 1) % 100);
 
         public DialPosition TurnRight()
-            => new(Position == 99 ? 0 : Position + 1);
+            => new((Position + 1) % 100);
 
         public IEnumerable<DialPosition> Follow(string instruction)
             => (instruction[0], int.Parse(instruction[1..])) switch
