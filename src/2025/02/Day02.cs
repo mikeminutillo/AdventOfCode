@@ -14,9 +14,9 @@ public class Day02 : AdventOfCodeBase<Day02>
             let numbers = range.ExtractNumbers<decimal>().ToArray()
             let start = numbers[0]
             let end = numbers[1]
-            from number in start.Unfold(x => x + 1).TakeWhile(x => x <= end).Prepend(start)
+            from number in start.UpTo(end)
             let id = number.ToString()
-            where !check(id)
+            where check(id)
             let _ = $"{range}: {id}".Dump()
             select number
             ).Sum();
@@ -24,7 +24,7 @@ public class Day02 : AdventOfCodeBase<Day02>
     static bool IsDoubled(ReadOnlySpan<char> id)
         => (id.Length / 2) switch
         {
-            var midpoint => !(id[..midpoint].SequenceEqual(id[midpoint..]))
+            var midpoint => (id[..midpoint].SequenceEqual(id[midpoint..]))
         };
 
     static bool IsMadeOfRepeats(ReadOnlySpan<char> id)
@@ -33,14 +33,19 @@ public class Day02 : AdventOfCodeBase<Day02>
         {
             if(CheckForRepeats(id, i))
             {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     static bool CheckForRepeats(ReadOnlySpan<char> id, int repeatLength)
     {
+        if(id.Length % repeatLength != 0)
+        {
+            return false;
+        }
+
         ReadOnlySpan<char> current = default;
         var count = 0;
 

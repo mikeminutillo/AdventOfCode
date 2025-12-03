@@ -20,6 +20,12 @@ static class Extensions
         public T Product() => source.Aggregate(T.MultiplicativeIdentity, (x, y) => x * y);
     }
 
+    extension<T>(T source) where T : INumber<T>
+    {
+        public IEnumerable<T> UpTo(T end)
+            => source.Unfold(n => n + T.One).TakeWhile(n => n <= end).Prepend(source);
+    }
+
     extension(string source)
     {
         public string[] AsLines() => source.Trim().Split('\n');
