@@ -11,9 +11,9 @@ public class Day03 : AdventOfCodeBase<Day03>
             .Select(b => MaxJoltage(b, batteryCount).Dump())
             .Sum();
 
-    static decimal MaxJoltage(string joltages, int digitCount)
-        => GetHighestSequenceOfDigits(joltages, digitCount)
-            .Aggregate(0m, (acc, d) => acc * 10 + (d - '0'));
+    static decimal MaxJoltage(string joltages, int batteryCount)
+        => GetHighestSequenceOfDigits(joltages, batteryCount)
+            .Aggregate(0m, (totalJoltage, digit) => totalJoltage * 10 + (digit - '0'));
 
     static IEnumerable<char> GetHighestSequenceOfDigits(ReadOnlySpan<char> digits, int count)
         => count switch
@@ -23,23 +23,23 @@ public class Day03 : AdventOfCodeBase<Day03>
             {
                 (var digit, var index) => [
                     digit,
-                        .. GetHighestSequenceOfDigits(digits[(index + 1)..], count -1)
+                    .. GetHighestSequenceOfDigits(digits[(index + 1)..], count - 1)
                 ]
             }
         };
 
     static (char digit, int index) MaxWithIndex(ReadOnlySpan<char> digits)
     {
-        char max = default;
+        char maxValue = default;
         var maxIndex = -1;
         for (var i = 0; i < digits.Length; i++)
         {
-            if (digits[i] > max)
+            if (digits[i] > maxValue)
             {
-                max = digits[i];
+                maxValue = digits[i];
                 maxIndex = i;
             }
         }
-        return (max, maxIndex);
+        return (maxValue, maxIndex);
     }
 }
