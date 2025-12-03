@@ -8,45 +8,38 @@ public class Day03 : AdventOfCodeBase<Day03>
 
     static decimal Solve(string input, int batteryCount)
         => input.AsLines()
-            .Select(BatteryBank.Parse)
-            .Select(b => b.MaxJoltage(batteryCount).Dump())
+            .Select(b => MaxJoltage(b, batteryCount).Dump())
             .Sum();
 
-    record BatteryBank(int[] BatteryJoltages)
-    {
-        public decimal MaxJoltage(int digitCount)
-            => GetHighestSequenceOfDigits(BatteryJoltages, digitCount)
-                .Aggregate(0m, (acc, d) => acc * 10 + d);
+    static decimal MaxJoltage(string joltages, int digitCount)
+        => GetHighestSequenceOfDigits(joltages, digitCount)
+            .Aggregate(0m, (acc, d) => acc * 10 + (d - '0'));
 
-        static IEnumerable<int> GetHighestSequenceOfDigits(ReadOnlySpan<int> digits, int count)
-            => count switch
-            {
-                0 => [],
-                _ => MaxWithIndex(digits[..^(count - 1)]) switch
-                {
-                    (var digit, var index) => [
-                        digit, 
-                        .. GetHighestSequenceOfDigits(digits[(index + 1)..], count -1)
-                    ]
-                }
-            };
-
-        static (int digit, int index) MaxWithIndex(ReadOnlySpan<int> digits)
+    static IEnumerable<char> GetHighestSequenceOfDigits(ReadOnlySpan<char> digits, int count)
+        => count switch
         {
-            var max = -1;
-            var maxIndex = -1;
-            for (var i = 0; i < digits.Length; i++)
+            0 => [],
+            _ => MaxWithIndex(digits[..^(count - 1)]) switch
             {
-                if (digits[i] > max)
-                {
-                    max = digits[i];
-                    maxIndex = i;
-                }
+                (var digit, var index) => [
+                    digit,
+                        .. GetHighestSequenceOfDigits(digits[(index + 1)..], count -1)
+                ]
             }
-            return (max, maxIndex);
-        }
+        };
 
-        public static BatteryBank Parse(string line)
-            => new([.. line.ToArray().Select(c => c - '0')]);
+    static (char digit, int index) MaxWithIndex(ReadOnlySpan<char> digits)
+    {
+        char max = default;
+        var maxIndex = -1;
+        for (var i = 0; i < digits.Length; i++)
+        {
+            if (digits[i] > max)
+            {
+                max = digits[i];
+                maxIndex = i;
+            }
+        }
+        return (max, maxIndex);
     }
 }
