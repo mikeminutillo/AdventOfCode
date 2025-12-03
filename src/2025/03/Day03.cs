@@ -15,10 +15,10 @@ public class Day03 : AdventOfCodeBase<Day03>
     record BatteryBank(int[] BatteryJoltages)
     {
         public decimal MaxJoltage(int digitCount)
-            => GetHighestSequenceOfDigits(BatteryJoltages.AsSpan(), digitCount)
+            => GetHighestSequenceOfDigits(BatteryJoltages, digitCount)
                 .Aggregate(0m, (acc, d) => acc * 10 + d);
 
-        static IEnumerable<int> GetHighestSequenceOfDigits(Span<int> digits, int count)
+        static IEnumerable<int> GetHighestSequenceOfDigits(ReadOnlySpan<int> digits, int count)
             => count switch
             {
                 0 => [],
