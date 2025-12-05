@@ -10,29 +10,7 @@ public class Day05 : AdventOfCodeBase<Day05>
     public override object? Solution2(string input)
         => Database.Parse(input).FreshRanges.Sum(x => x.ItemsCovered);
     
-    record PartId(string Id)
-    {
-        public static bool operator >=(PartId left, PartId right)
-            => (left.Id.Length - right.Id.Length) switch
-            {
-                < 0 => false,
-                > 0 => true,
-                0 => string.Compare(left.Id, right.Id, StringComparison.Ordinal) >= 0
-            };
-
-        public static bool operator <=(PartId left, PartId right)
-            => (left.Id.Length - right.Id.Length) switch
-            {
-                < 0 => true,
-                > 0 => false,
-                0 => string.Compare(left.Id, right.Id, StringComparison.Ordinal) <= 0
-            };
-
-        public static decimal operator -(PartId left, PartId right)
-            => decimal.Parse(left.Id) - decimal.Parse(right.Id);
-    }
-
-    record IngredientRange(PartId Min, PartId Max)
+    record IngredientRange(decimal Min, decimal Max)
     {
         public decimal ItemsCovered => Max - Min + 1;
 
@@ -48,15 +26,15 @@ public class Day05 : AdventOfCodeBase<Day05>
         public bool Intersects(IngredientRange other)
             => Contains(other.Min) || Contains(other.Max);
 
-        public bool Contains(PartId id)
+        public bool Contains(decimal id)
             => id >= Min && id <= Max;
 
         public static IngredientRange Parse(string input)
             => input.Split('-') switch
             {
                 var parts => new IngredientRange(
-                    new(parts[0]), 
-                    new(parts[1])
+                    decimal.Parse(parts[0]), 
+                    decimal.Parse(parts[1])
                 )
             };
 
@@ -74,13 +52,12 @@ public class Day05 : AdventOfCodeBase<Day05>
             };
     }
 
-    record Database(ImmutableArray<IngredientRange> FreshRanges, ImmutableArray<PartId> AvailableIngredients)
+    record Database(ImmutableArray<IngredientRange> FreshRanges, ImmutableArray<decimal> AvailableIngredients)
     {
-        public IEnumerable<PartId> GetAllFreshIngredients()
+        public IEnumerable<decimal> GetAllFreshIngredients()
             => from ingredient in AvailableIngredients
-               let matchingRanges = FreshRanges.Where(range => range.Contains(ingredient)).ToArray()
-               where matchingRanges.Dump().Length != 0
-               select ingredient.Dump();
+               where FreshRanges.Any(range => range.Contains(ingredient))
+               select ingredient;
 
         public static Database Parse(string input)
             => input.AsLines() switch
@@ -90,11 +67,11 @@ public class Day05 : AdventOfCodeBase<Day05>
                     .Aggregate(
                         (
                             fresh: ImmutableArray<IngredientRange>.Empty,
-                            available: ImmutableArray<PartId>.Empty
+                            available: ImmutableArray<decimal>.Empty
                         ), 
                         (state, line) => line.Contains('-')
                             ? (state.fresh.Add(IngredientRange.Parse(line)), state.available)
-                            : (state.fresh, state.available.Add(new(line))),
+                            : (state.fresh, state.available.Add(decimal.Parse(line))),
                         state => new Database(
                             IngredientRange.Normalize(state.fresh),
                             state.available
