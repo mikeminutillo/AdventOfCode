@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Numerics;
 
 namespace AdventOfCode._2025._05;
 
@@ -8,13 +9,13 @@ public class Day05 : AdventOfCodeBase<Day05>
         => Database.Parse(input).GetAllFreshIngredients().Count();
 
     public override object? Solution2(string input)
-        => Database.Parse(input).FreshRanges.Sum(x => x.ItemsCovered);
-    
-    record IngredientRange(decimal Min, decimal Max)
-    {
-        public decimal ItemsCovered => Max - Min + 1;
+        => Database.Parse(input).Normalized().FreshRanges.Sum(x => x.ItemsCovered);
 
-        public ImmutableArray<IngredientRange> Intersection(IngredientRange other)
+    record Range<T>(T Min, T Max) where T : INumber<T>
+    {
+        public T ItemsCovered => Max - Min + T.One;
+
+        public ImmutableArray<Range<T>> Union(Range<T> other)
             => (Contains(other.Min), Contains(other.Max)) switch
             {
                 (true, true) => [this],
@@ -23,37 +24,31 @@ public class Day05 : AdventOfCodeBase<Day05>
                 (false, false) => [this, other]
             };
 
-        public bool Intersects(IngredientRange other)
-            => Contains(other.Min) || Contains(other.Max);
+        public bool Intersects(Range<T> other)
+            => Contains(other.Min) || Contains(other.Max)
+            || other.Contains(Min) || other.Contains(Max);
 
-        public bool Contains(decimal id)
+        public bool Contains(T id)
             => id >= Min && id <= Max;
 
-        public static IngredientRange Parse(string input)
-            => input.Split('-') switch
-            {
-                var parts => new IngredientRange(
-                    decimal.Parse(parts[0]), 
-                    decimal.Parse(parts[1])
-                )
-            };
-
-        public static ImmutableArray<IngredientRange> Normalize(ImmutableArray<IngredientRange> input)
+        public static ImmutableArray<Range<T>> Normalize(ImmutableArray<Range<T>> input)
             => input switch
             {
                 [] => [],
                 [var x] => [x],
-                [var x, var y] => x.Intersection(y),
-                [var head, .. var tail] => tail.FirstOrDefault(x => x.Intersects(head) || head.Intersects(x)) switch
+                [var x, var y] => x.Union(y),
+                [var head, .. var tail] => tail.FirstOrDefault(x => x.Intersects(head)) switch
                 {
                     null => [head, ..Normalize(tail)],
-                    var match => Normalize([..match.Intersection(head), ..tail.Remove(match)])
+                    var match => Normalize([..match.Union(head), ..tail.Remove(match)])
                 }
             };
     }
 
-    record Database(ImmutableArray<IngredientRange> FreshRanges, ImmutableArray<decimal> AvailableIngredients)
+    record Database(ImmutableArray<Range<decimal>> FreshRanges, ImmutableArray<decimal> AvailableIngredients)
     {
+        public Database Normalized() => new(Range<decimal>.Normalize(FreshRanges), AvailableIngredients);
+
         public IEnumerable<decimal> GetAllFreshIngredients()
             => from ingredient in AvailableIngredients
                where FreshRanges.Any(range => range.Contains(ingredient))
@@ -66,14 +61,21 @@ public class Day05 : AdventOfCodeBase<Day05>
                     .Where(x => string.IsNullOrWhiteSpace(x) == false)
                     .Aggregate(
                         (
-                            fresh: ImmutableArray<IngredientRange>.Empty,
+                            fresh: ImmutableArray<Range<decimal>>.Empty,
                             available: ImmutableArray<decimal>.Empty
                         ), 
-                        (state, line) => line.Contains('-')
-                            ? (state.fresh.Add(IngredientRange.Parse(line)), state.available)
-                            : (state.fresh, state.available.Add(decimal.Parse(line))),
+                        (state, line) => line.ExtractNumbers<decimal>().ToArray() switch
+                        {
+                            [var one] => (state.fresh, state.available.Add(one)),
+                            [var min, var max] => (
+
+                                state.fresh.Add(new(min, max)), 
+                                state.available
+                            ),
+                            _ => throw new Exception("Invalid input")
+                        },
                         state => new Database(
-                            IngredientRange.Normalize(state.fresh),
+                            state.fresh,
                             state.available
                         )
                     )
